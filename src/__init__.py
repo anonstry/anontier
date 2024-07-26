@@ -1,8 +1,8 @@
 from dynaconf import settings
 from hydrogram import Client
 
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 # from git.repo import Repo
-# from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 client: Client = Client(
     name=settings.TELEGRAM_APP_NAME,
@@ -22,4 +22,4 @@ client: Client = Client(
 # print(f"Lastest repository tag is: {latest_repository_tag}")
 # print(f"Lastest repository commit shorted is {latest_repository_commit_shorted}")
 
-# scheduler = AsyncIOScheduler()
+scheduler = AsyncIOScheduler()

@@ -1,19 +1,22 @@
-# Arquivo é bem básico ainda.
-# Move to session/sanization.py @future
-
-
+from functools import partial
 from hydrogram.client import Client
 from hydrogram.enums import ChatAction
 
-from src import session, broadcast
-
+from src import broadcast, scheduler
+from src.session.room import search_empty_rooms
+from src.session.user import return_all_users
 
 from hydrogram.errors import UserIsBlocked
 
 
-async def check_blocked_users(client: Client):
-    print("Here")
-    for user in session.return_all_users():
+def delete_empty_rooms():
+    "Delete rooms with no linked users"
+    for room in search_empty_rooms():
+        room.delete()
+
+
+async def find_blocked_users(client: Client):
+    for user in return_all_users():
         try:
             await client.send_chat_action(user.telegram_account_id, ChatAction.PLAYING)
         except UserIsBlocked:
@@ -25,21 +28,18 @@ async def check_blocked_users(client: Client):
                 await broadcast.notify_room_members(client, caption, room_token)
 
 
-
-
-# scheduled_tasks = [
-#     {
-#         "func": partial(sanitize.check_blocked_users, client),
-#         "trigger": "cron",
-#         # "minute": 1,
-#         "minute": 0,
-#         "second": 1,
-#     },
-#     {
-#         "func": session.sanitize_rooms,
-#         "trigger": "cron",
-#         "minute": 1,
-#     },
-# ]
-# for scheduled_task in scheduled_tasks:
-#     scheduler.add_job(**scheduled_task)
+def schedule_sanization(client):
+    scheduled_tasks = [
+        {
+            "func": partial(find_blocked_users, client),
+            "trigger": "cron",
+            "minute": 10,
+        },
+        {
+            "func": delete_empty_rooms,
+            "trigger": "cron",
+            "second": 60,
+        },
+    ]
+    for scheduled_task in scheduled_tasks:
+        scheduler.add_job(**scheduled_task)
