@@ -5,7 +5,9 @@ from hydrogram.client import Client
 from hydrogram.types import Message
 from loguru import logger
 
-from src import client, session
+from src import client
+from src.session.user import User
+from src.session.room import Room
 
 
 def implement():
@@ -15,7 +17,7 @@ def implement():
 
 @client.on_message(filters.private & filters.command("start"))
 async def initialize(client: Client, message: Message):  # initialization
-    user = session.User(message.from_user.id)
+    user = User(message.from_user.id)
     user.create()
     user.refresh()
     if user.room_token:
@@ -31,10 +33,10 @@ async def initialize(client: Client, message: Message):  # initialization
 
 @client.on_message(filters.private & filters.command("status"))
 async def show_bot_status(client: Client, message: Message):
-    user = session.User(message.from_user.id)
+    user = User(message.from_user.id)
     user.create()
     user.refresh()
-    room = session.Room(user.room_token)
+    room = Room(user.room_token)
     file = Path("messages/dynamic/status.txt")
     try:
         room.refresh()
