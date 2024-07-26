@@ -1,9 +1,9 @@
 # Alternative to Pyrogram Plugins
 # Implement all using the wanted order
 
-from . import guidelines
-from . import connection
-from . import mimic
+from src.modules import guidelines
+from src.modules import connection
+from src.modules import mimic
 
 
 def implement():

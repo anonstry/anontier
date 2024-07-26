@@ -5,7 +5,7 @@
 from hydrogram.client import Client
 from hydrogram.enums import ChatAction
 
-from . import session, broadcast
+from src import session, broadcast
 
 
 from hydrogram.errors import UserIsBlocked

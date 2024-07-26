@@ -3,7 +3,7 @@ from loguru import logger
 # from hydrogram import filters
 # from hydrogram.client import Client
 # from hydrogram.types import Message
-from ... import client
+from src import client
 
 from hydrogram.types import (
     InlineQueryResultArticle,

@@ -4,7 +4,7 @@ from hydrogram.types import Message
 from hydrogram import filters
 from loguru import logger
 
-from .. import client
+from src import client
 
 
 def implement():

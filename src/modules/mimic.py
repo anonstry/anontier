@@ -9,7 +9,7 @@ from hydrogram.errors.exceptions.bad_request_400 import (
 from hydrogram.types import Message
 from loguru import logger
 
-from .. import client, methods, session
+from src import client, methods, session
 
 
 def implement():

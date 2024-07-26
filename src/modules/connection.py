@@ -11,9 +11,9 @@ from hydrogram.types import Message, Update
 from hydrogram.raw.types import UpdateBotStopped
 from loguru import logger
 
-from .. import client, session
-from ..broadcast import notify_room_members
-from ..modded.copy_media_group import copy_media_group
+from src import client, session
+from src.broadcast import notify_room_members
+from src.modded.copy_media_group import copy_media_group
 
 
 def implement():

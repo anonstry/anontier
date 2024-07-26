@@ -1,6 +1,6 @@
 from hydrogram.client import Client
 
-from . import session
+from src import session
 
 
 async def notify_all_users(client: Client, caption: str):

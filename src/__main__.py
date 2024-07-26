@@ -1,6 +1,6 @@
 from hydrogram import idle
 
-from . import client, modules
+from src import client, modules
 
 
 async def routine(app):

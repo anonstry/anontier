@@ -5,7 +5,7 @@ from hydrogram.client import Client
 from hydrogram.types import Message
 from loguru import logger
 
-from .. import client, session
+from src import client, session
 
 
 def implement():
