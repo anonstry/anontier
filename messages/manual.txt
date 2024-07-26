@@ -1,0 +1,17 @@
+**By default match is positve** (ascending order)
+`/match +1` __To search for a party with less users__
+`/match -1` __To search for a party with more users__
+
+
+**By default the party size is +2** (maximum is 10).
+`/party -2` (negative) __To create a hidden party.__
+`/party 10` (positive) __To create a public party.__
+
+
+**Premium** (only with Monero/XMR)
++ Hability to create a room with than 20 peers/users.
++ Hability to send auto-destructive messages.
+<s>+ Soon: Hability to send 5 daily mails.</s>
+
+
+@ for contact is @...

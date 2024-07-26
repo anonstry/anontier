@@ -1,0 +1,5 @@
+**The bot is active!**
+__Instance: @{INSTANCE_USERNAME}__
+
+**Linked room token:** `{ROOM_TOKEN}`
+**All linked user(s) to you:** `{ROOM_PARTICIPANTS_COUNT}` of `{ROOM_SIZE_LIMIT}`
