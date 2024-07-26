@@ -1,0 +1,8 @@
+match - Search for a public room
+unmatch - Exit the current room
+party - Create a room
+join - Join in a room
+manual - To see the instructions
+start - Initialize the bot
+status - See your current status
+terms - To see the terms
