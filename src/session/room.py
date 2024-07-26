@@ -8,7 +8,6 @@ class Room:
         self.token = token or create_token(32)
         self.size_limit = max(2, size_limit)  # No lower than 2
         self.size_limit = min(10, self.size_limit)  # No higher than 10 (if not premium)
-        self.token = token
         self.hidden = hidden
         self.participants_count = 0
         self.title = None # @experimental

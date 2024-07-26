@@ -8,7 +8,6 @@ from hydrogram.errors.exceptions.bad_request_400 import (
 )
 from hydrogram.types import Message
 
-from src import client
 from src.session.message import DatabaseMessage
 from src.session.message import (
     search_for_original_messages_with_id,
@@ -18,7 +17,7 @@ from src.session.user import DatabaseUser
 from src.telegram.methods import mount_input_media
 
 
-@client.on_edited_message(filters.private & filters.text)
+@Client.on_edited_message(filters.private & filters.text)
 async def edit_linked_message_text(client: Client, message: Message):
     user = DatabaseUser(message.from_user.id)
     user.create()
@@ -39,7 +38,7 @@ async def edit_linked_message_text(client: Client, message: Message):
         )
 
 
-@client.on_edited_message(filters.private & filters.media)
+@Client.on_edited_message(filters.private & filters.media)
 async def edit_linked_message_media(client: Client, message: Message):
     print("Message media")
     user = DatabaseUser(message.from_user.id)
@@ -71,7 +70,7 @@ async def edit_linked_message_media(client: Client, message: Message):
             )  # Try to edit or delete the caption
 
 
-@client.on_deleted_messages()
+@Client.on_deleted_messages()
 async def delete_linked_messages(client: Client, messages: list[Message]):
     for deleted_message in messages:
         for database_message in search_for_original_messages_with_id(

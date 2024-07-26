@@ -22,7 +22,9 @@ class User:
         self.telegram_account_id = database_user_document["telegram_account_id"]
         self.room_token = database_user_document["room_token"]
         self.premium = database_user_document["premium"]
-        self.protected_transmition = database_user_document["protected_transmition"]
+        self.protected_transmition = database_user_document.get(
+            "protected_transmition", True
+        )
 
     def exists(self):
         query = {"telegram_account_id": self.telegram_account_id}
@@ -40,7 +42,7 @@ class User:
                     "telegram_account_id": self.telegram_account_id,
                     "room_token": self.room_token,
                     "premium": self.premium,
-                    "protected_transmition": self.protected_transmition
+                    "protected_transmition": self.protected_transmition,
                 }
             )
 

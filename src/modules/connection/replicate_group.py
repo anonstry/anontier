@@ -10,11 +10,10 @@ from hydrogram.errors.exceptions.forbidden_403 import UserIsBlocked
 from hydrogram.types import Message
 from loguru import logger
 
-from src import client
 from src.session.message import DatabaseMessage, search_correspondent_replied_message
 from src.session.user import User as DatabaseUser
 from src.session.user import search_room_members
-from src.telegram.filters.room import _filter_room_linked
+from src.telegram.filters.room import filter_room_linked
 from src.telegram.modded.copy_media_group import copy_media_group
 
 _tasks = set()
@@ -39,9 +38,9 @@ class Album:
 _albums: defaultdict[int, dict[str, Album]] = defaultdict(dict)
 
 
-@client.on_message(
+@Client.on_message(
     filters.private
-    & _filter_room_linked
+    & filter_room_linked
     & filters.media_group
     & ~filters.command(str())
 )

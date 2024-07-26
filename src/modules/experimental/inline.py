@@ -1,24 +1,18 @@
-from loguru import logger
-
-# from hydrogram import filters
-# from hydrogram.client import Client
 # from hydrogram.types import Message
-from src import client
-
+# from loguru import logger
+# from hydrogram import filters
+from hydrogram.client import Client
 from hydrogram.types import (
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
     InlineQueryResultArticle,
     InputTextMessageContent,
-    InlineKeyboardMarkup,
-    InlineKeyboardButton,
 )
 
-
-def implement():
-    "Lazy function"
-    logger.info("Experimetal module was implemented")
+# The max size for a url parameter is 64
 
 
-@client.on_inline_query()
+@Client.on_inline_query()
 async def answer(client, inline_query):
     await inline_query.answer(
         results=[

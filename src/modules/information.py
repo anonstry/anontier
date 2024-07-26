@@ -4,33 +4,16 @@ from hydrogram import filters
 from hydrogram.client import Client
 from hydrogram.types import Message
 
-from src import client
-from src.session.user import User
+from src.session.user import DatabaseUser
 from src.session.room import Room
 
 
-@client.on_message(filters.private & filters.command("start"))
-async def initialize(client: Client, message: Message):  # initialization
-    user = User(message.from_user.id)
-    user.create()
-    user.refresh()
-    if user.room_token:
-        caption = "You already in a conversation"
-        await message.reply(text=caption, quote=True)
-        return
-    file = Path("messages/initialization.txt")
-    caption = file.read_text()
-    await message.reply(text=caption, quote=True)
-    message.stop_propagation()
-    # The max size for a url parameter is 64
-
-
-@client.on_message(filters.private & filters.command("status"))
+@Client.on_message(filters.private & filters.command("status"))
 async def show_bot_status(client: Client, message: Message):
-    user = User(message.from_user.id)
-    user.create()
-    user.refresh()
-    room = Room(user.room_token)
+    database_user = DatabaseUser(message.from_user.id)
+    database_user.create()
+    database_user.refresh()
+    room = Room(database_user.room_token)
     file = Path("messages/dynamic/status.txt")
     try:
         room.refresh()
@@ -51,7 +34,7 @@ async def show_bot_status(client: Client, message: Message):
     message.stop_propagation()
 
 
-@client.on_message(filters.private & filters.command("manual"))
+@Client.on_message(filters.private & filters.command("manual"))
 async def show_bot_manual(client: Client, message: Message):
     file = Path("messages/manual.txt")
     caption = file.read_text()
@@ -59,7 +42,7 @@ async def show_bot_manual(client: Client, message: Message):
     message.stop_propagation()
 
 
-@client.on_message(filters.private & filters.command("terms"))
+@Client.on_message(filters.private & filters.command("terms"))
 async def show_bot_terms(client: Client, message: Message):
     file = Path("messages/terms.txt")
     caption = file.read_text()

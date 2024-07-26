@@ -4,7 +4,6 @@ from hydrogram.errors.exceptions.forbidden_403 import UserIsBlocked
 from hydrogram.types import Message
 from loguru import logger
 
-from src import client
 from src.telegram.filters.room import filter_room_linked
 from src.session.message import DatabaseMessage, search_correspondent_replied_message
 from src.session.user import User as DatabaseUser
@@ -39,7 +38,7 @@ async def send_single_message(
         room_member.delete()
 
 
-@client.on_message(
+@Client.on_message(
     filters.private
     & filter_room_linked
     & ~filters.media_group
