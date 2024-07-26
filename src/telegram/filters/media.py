@@ -11,5 +11,7 @@ async def filter_media_copiable(_, __, message):
         or not message.video
     ):
         return False  # The media is not copiable
+    else:
+        return True
 
-media_copiable = filters.create(filter_media_copiable)
+filter_copiable = filters.create(filter_media_copiable)
