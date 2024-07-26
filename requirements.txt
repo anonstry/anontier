@@ -4,3 +4,4 @@ dynaconf
 loguru
 tgcrypto
 apscheduler
+git
