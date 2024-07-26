@@ -1,35 +1,27 @@
 # Anodos • Incognito
 
-> Preciso construir um porto-seguro, a safe-point.
+> Um porto-seguro para troca de mensagens.
 
+### Instantiate
 
-### Instantiate — your own bot instance
-
-1. Configure o arquivo `secrets.example.toml`, para o `dynaconf.settings`
+1. Configure o arquivo `secrets.example.toml`
 2. Inicialize o banco de dados — podemos usar um docker para isso, futuramente
-3. Rode `python -m src` e aguarde
-
-> Depois possivelmente o `requirements.txt` pode ser movido para dentro do `pyproject.toml`.
+3. Rode `python -m src` e veja o funcionameno
 
 ##### Recommended settings
 Não é preciso muito para rodar sua própria instância. No entanto, até por não usarmos cache no Telegram (algo como copiar as mensagens e usar elas prontas ao invés de sempre montar todas), é bom que tenha uma rápida internet para o envio de mídias (os assets), talvez 100MBs.
 
-
 ---
-
 
 ### Contact
 
 Any bugs or something to report, send a e-mail to `anonstry@protonmail.com`
 
-
 ### Support
 
 Se você quiser colaborar com o projeto, seja bem-vindo para rodar sua própria instância, sugerir mudanças ou então apoiar o projeto com doações via Monero/XMR no endereço de carteira: `843zPnwtKfUZsYDTGj5vbv9tX7yTdbBjBgNuiCF5xAmeWqbPqEs769FbyJNi5qCStz5cnvJwgtppdamCKgfPWWmB6R67W7Z`
 
-
 ---
-
 
 ### Development
 
@@ -51,7 +43,7 @@ Se você quiser colaborar com o projeto, seja bem-vindo para rodar sua própria 
 
 * **Specific features**
     - [ ] A dockerfile (with alpine)
-    - [ ] New filter: `copiable` → if document, video, photo, audio or and animation
+    - [x] New filter: `copiable` → if document, video, photo, audio or and animation
 
 * **Profiles**
     - [ ] Delete all user messages with a command
@@ -65,8 +57,8 @@ Se você quiser colaborar com o projeto, seja bem-vindo para rodar sua própria 
     - [ ] Add room inactivity control
 
 * **Notifications**
-    - [x] If a user blocks the bot, notify the remaining peers/users 
-    - [x] If a user leave the room, notify the remaining peers/users
+    - [ ] If a user blocks the bot, notify the remaining peers/users 
+    - [ ] If a user leave the room, notify the remaining peers/users
 
 * **Sanitization**
     - [x] Remove the empty rooms
@@ -76,11 +68,9 @@ Se você quiser colaborar com o projeto, seja bem-vindo para rodar sua própria 
     - [ ] Notify the user if the message.edit fail
     - [ ] Notify the user if the message.delete fail
 
-
 --- 
 
-
-#### Disclaimer • Aviso & Manifesto
+### Disclaimer • Aviso & Manifesto
 
 Se o Telegram realmente fosse a favor da privacidade, ele melhoraria o **Secret Chat** que supostamente é criptografado de ponta-a-ponta. Estranho esse descaso e aparente desinteresse por parte da plataforma, não é? Não parece algo desapercebido, e sim negligência proprosital.
 
@@ -88,35 +78,31 @@ Se o Telegram realmente fosse a favor da privacidade, ele melhoraria o **Secret 
 
 Mantemos as conversas de um jeito incógnito, tentando ao máximo unir privacidade com anonimato. Mas devemos questionar uma coisa: o Telegram realmente não lê as mensagens mandadas para o bot?! Saiba que: se um bot for banido mesmo com o encaminhamento de mensagem sendo restrito/desabilitado, o Telegram precisou de alguma forma acessar uma mensagem (ou também uma mídia) em um ambiente privado!
 
-#### Próximos grandes passos
+##### Regras
+\- As salas (rooms) devem por padrão terem todas as restrições padrões ativas.
+\- A não-restrição deve ocorrer por parte do usuário e deve ser OPCIONAL. Exemplo: ao optar por habilitar ou não o encaminhamento de suas mensagens, assim ao como optar ou não por ter uma etiqueta de apelido em suas mensagens...
+
+##### Anúncios
+
+_Nem de flores vive o mundo._
+
+Se você roda sua instância, um gasto irá ter. Então consideremos a opção de rodar anúncios para usuários não-apoiadores dela, ok? É justo, ao meu ver, afinal, é uma forma de sustentabilizar a rede. Por exemplo: `if not user.premium and len(user.messages_count) % 100...`
+
+##### Proteção & Mitigação
+
+Talvez a solução para não usar Redis e usar apenas Mongo localmente (com cópia remota reserva) seja por uma senha para acessar o banco e de alguma forma — talvez com um espaço a mais no Bash — passar ela de forma oculta/temporária.
+
+De acordo com os termos de responsabilidade, não é culpa do software/código o que nele é compartilhado, isto é, a moderação é APENAS por parte dos usuários! Ok? Se há dúvida, confira por conta própria e veja que não há alguma forma criada para supervisionar o que é dito. Mas não sabemos as formas de censura que podem tentar impor às instâncias, portanto, como proteção, tente optar por Monero.
+
+_XMR, ou Monero, tem uma intíma ligação com o anonimato e por anos continua sendo resistente à censura. E você pode ver mais sobre em getmonero.org·_
+
+##### Próximos grandes passos
 
 Nós temos a idea de expandir mais, algo como uma plataforma pronta. E isso irá requerer investimento. Todavia, você também pode usar outras redes, sendo algumas das nossas recomendações:
-
 - Simplex
 - Session
 - Matrix/Element
 
 Até pensamos em uma idea de federações, até pra dificultar a censura, mas seria preciso um resolvedor e conector para ligar uma instância a outra. Mas você pode fazer algo assim, talvez localmente ou criando seu próprio diretório.
 
-#### Manuseio e controle
-
-- As salas (rooms) devem por padrão terem todas as restrições padrões ativas.
-- A não-restrição deve ocorrer por parte do usuário e deve ser OPCIONAL. Exemplo: ao optar por habilitar ou não o encaminhamento de suas mensagens, assim ao como optar ou não por ter uma etiqueta de apelido em suas mensagens...
-
-
----
-
-
-##### Anúncios
-_Nem de flores vive o mundo._
-Se você roda sua instância, um gasto irá ter. Então consideremos a opção de rodar anúncios para usuários não-apoiadores dela, ok? É justo, ao meu ver, afinal, é uma forma de sustentabilizar a rede. Exemplo: `if not user.premium and len(user.messages_count) % 100...`
-
-##### Tradução
 Para internacionalização podemos usar criar algo como um `Capptioner` (um gerenciador de legendas), por exemplo, messages.en.message & messages.pt.message, or something like this.
-
-##### Monetário
-De acordo com os termos de responsabilidade, não é culpa do software/código o que nele é compartilhado, isto é, a moderação é APENAS por parte dos usuários! Ok? Se há dúvida, confira por conta própria e veja que não há alguma forma criada para supervisionar o que é dito. Mas não sabemos as formas de censura que podem tentar impor às instâncias, portanto, como proteção, tente optar por Monero. \
-_XMR, ou Monero, tem uma intíma ligação com o anonimato e por anos continua sendo resistente à censura. E você pode ver mais sobre em getmonero.org·_
-
-##### Proteção & Mitigação
-Talvez a solução para não usar Redis e usar apenas Mongo localmente (com cópia remota reserva) seja por uma senha para acessar o banco e de alguma forma — talvez com um espaço a mais no Bash — passar ela de forma oculta/temporária.
