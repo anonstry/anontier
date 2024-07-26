@@ -2,8 +2,7 @@
 
 > Preciso construir um porto-seguro, a safe-point.
 
-Se você quiser colaborar com o projeto, seja bem-vindo para rodar sua própria instância, sugerir mudanças ou então apoiar o projeto com doações via Monero/XMR no endereço de carteira: <MONERO_ADDRESS>
-
+Se você quiser colaborar com o projeto, seja bem-vindo para rodar sua própria instância, sugerir mudanças ou então apoiar o projeto com doações via Monero/XMR no endereço de carteira: `843zPnwtKfUZsYDTGj5vbv9tX7yTdbBjBgNuiCF5xAmeWqbPqEs769FbyJNi5qCStz5cnvJwgtppdamCKgfPWWmB6R67W7Z`
 
 ### Initial guide
 
