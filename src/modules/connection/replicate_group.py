@@ -41,8 +41,9 @@ _albums: defaultdict[int, dict[str, Album]] = defaultdict(dict)
 @Client.on_message(
     filters.private
     & filter_room_linked
+    & ~filters.regex("^/")
+    # & ~filters.command
     & filters.media_group
-    & ~filters.command(str())
 )
 async def on_media_group(client: Client, message: Message):
     try:
@@ -117,9 +118,9 @@ async def on_album(client: Client, album: Album):
                     "Could not find which message(s) is being replied in the current room!"
                 )
             else:
-                reply_to_message_id = (
-                    database_linked_reply_to_message.telegram_message_id
-                )
+                reply_to_message_id = database_linked_reply_to_message[
+                    "telegram_message_id"
+                ]
         await send_grouped_messages(
             client,
             album.messages,

@@ -13,6 +13,7 @@ client: Client = Client(
 )
 
 git_repository = Repo(search_parent_directories=True)
+# git_repository_remote_link = git_repository.remotes[0].config_reader.get("url")
 latest_git_repository_tag = sorted(
     git_repository.tags, key=lambda tag: tag.commit.committed_datetime
 )[-1].name

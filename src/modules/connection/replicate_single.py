@@ -41,8 +41,9 @@ async def send_single_message(
 @Client.on_message(
     filters.private
     & filter_room_linked
+    & ~filters.regex("^/")
+    # & ~filters.command
     & ~filters.media_group
-    & ~filters.command(str())
 )
 async def broadcast(client: Client, message: Message):
     database_user = DatabaseUser(message.from_user.id)
@@ -83,9 +84,9 @@ async def broadcast(client: Client, message: Message):
                     "Could not find which message(s) is being replied in the current room!"
                 )
             else:
-                reply_to_message_id = (
-                    database_linked_reply_to_message.telegram_message_id
-                )
+                reply_to_message_id = database_linked_reply_to_message[
+                    "telegram_message_id"
+                ]
         await send_single_message(
             client,
             message,

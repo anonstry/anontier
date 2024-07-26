@@ -6,7 +6,7 @@ from hydrogram.types import Message
 
 from src.session.user import DatabaseUser
 from src.session.room import Room
-
+from src import latest_git_repository_commit_shorted
 
 @Client.on_message(filters.private & filters.command("status"))
 async def show_bot_status(client: Client, message: Message):
@@ -19,6 +19,7 @@ async def show_bot_status(client: Client, message: Message):
         room.refresh()
         caption = file.read_text().format(
             INSTANCE_USERNAME=client.me.username,
+            LAST_COMMIT=latest_git_repository_commit_shorted,
             ROOM_TOKEN=room.token,
             ROOM_PARTICIPANTS_COUNT=room.participants_count,
             ROOM_SIZE_LIMIT=room.size_limit,
@@ -26,6 +27,7 @@ async def show_bot_status(client: Client, message: Message):
     except AssertionError:
         caption = file.read_text().format(
             INSTANCE_USERNAME=client.me.username,
+            LAST_COMMIT=latest_git_repository_commit_shorted,
             ROOM_TOKEN="Null",
             ROOM_PARTICIPANTS_COUNT="Null",
             ROOM_SIZE_LIMIT="Null",

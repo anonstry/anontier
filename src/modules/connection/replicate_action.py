@@ -19,12 +19,12 @@ from src.telegram.methods import mount_input_media
 
 @Client.on_edited_message(filters.private & filters.text)
 async def edit_linked_message_text(client: Client, message: Message):
-    user = DatabaseUser(message.from_user.id)
-    user.create()
-    user.refresh()
+    database_user = DatabaseUser(message.from_user.id)
+    database_user.create()
+    database_user.refresh()
     database_message = DatabaseMessage(
         from_telegram_chat_id=message.chat.id,
-        from_room_token=user.room_token,
+        from_room_token=database_user.room_token,
         telegram_message_id=message.id,
     )
     database_message.create()
@@ -34,19 +34,19 @@ async def edit_linked_message_text(client: Client, message: Message):
         await client.edit_message_text(
             database_linked_message.from_telegram_chat_id,
             database_linked_message.telegram_message_id,
-            message.text,
+            message.html,
         )
 
 
 @Client.on_edited_message(filters.private & filters.media)
 async def edit_linked_message_media(client: Client, message: Message):
     print("Message media")
-    user = DatabaseUser(message.from_user.id)
-    user.create()
-    user.refresh()
+    database_user = DatabaseUser(message.from_user.id)
+    database_user.create()
+    database_user.refresh()
     database_message = DatabaseMessage(
         from_telegram_chat_id=message.chat.id,
-        from_room_token=user.room_token,
+        from_room_token=database_user.room_token,
         telegram_message_id=message.id,
     )
     database_message.create()

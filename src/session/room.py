@@ -5,7 +5,7 @@ class Room:
     mongo_collection = mongo_database["rooms"]
 
     def __init__(self, token=None, size_limit=2, hidden=False):
-        self.token = token or create_token(32)
+        self.token = token or create_token(24)
         self.size_limit = max(2, size_limit)  # No lower than 2
         self.size_limit = min(10, self.size_limit)  # No higher than 10 (if not premium)
         self.hidden = hidden

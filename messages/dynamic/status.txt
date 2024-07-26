@@ -1,5 +1,7 @@
 **The bot is active!**
-__Instance: @{INSTANCE_USERNAME}__
 
-**Linked room token:** `{ROOM_TOKEN}`
-**All linked user(s) to you:** `{ROOM_PARTICIPANTS_COUNT}` of `{ROOM_SIZE_LIMIT}`
+• **Profile**: @{INSTANCE_USERNAME}__
+• **Last commit:** `#{LAST_COMMIT}`
+
+• **Linked room token:** `{ROOM_TOKEN}`
+• **Linked room participants:** `{ROOM_PARTICIPANTS_COUNT}` of `{ROOM_SIZE_LIMIT}`
