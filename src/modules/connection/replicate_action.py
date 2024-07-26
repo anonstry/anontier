@@ -10,12 +10,12 @@ from hydrogram.types import Message
 # from loguru import logger
 
 from src import client
-from src.session.message import Message as DatabaseMessage
+from src.session.message import DatabaseMessage
 from src.session.message import (
     search_for_deleted_message_with_id,
     search_linked_messages,
 )
-from src.session.user import User as DatabaseUser
+from src.session.user import DatabaseUser
 from src.telegram.methods import mount_input_media
 
 
