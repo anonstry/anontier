@@ -4,5 +4,8 @@
 # Ignore some python files
 **/__pycache__
 
+# Ignore experimental assets
+assets/experimental
+
 # Unknown
 manifesto.txt
