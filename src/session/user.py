@@ -18,7 +18,7 @@ class User:
         self.room_token = room_token
         self.premium = False
         self.token = secrets.token_hex(16)
-        # self.pseudonome = None
+        # self.pseudonome = None # Use Faker
 
     def refresh(self):
         query = {"telegram_account_id": self.telegram_account_id}
