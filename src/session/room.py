@@ -1,24 +1,23 @@
-from pymongo import MongoClient
-from dynaconf import settings
-
-import secrets
-
-mongo_client = MongoClient(settings.MONGO_CONNECTION_STRING)
-mongo_database = mongo_client[settings.MONGO_DATABASE_NAME]
+from src.session import mongo_database, create_token
 
 
 class Room:
     mongo_collection = mongo_database["rooms"]
 
     def __init__(self, token=None, size_limit=2, hidden=False):
-        if not token:
-            token = secrets.token_hex(48)
-        self.token = token
+        self.token = token or create_token(32)
         self.size_limit = max(2, size_limit)  # No lower than 2
         self.size_limit = min(10, self.size_limit)  # No higher than 10 (if not premium)
         self.token = token
         self.hidden = hidden
         self.participants_count = 0
+        self.title = None # @experimental
+        self.obrigatory_rules = None # @experimental
+        self.restricted_users = None # @experimental
+        self.restricted_rights = None # @experimental
+        self.not_permited_users = None # @experimental
+        self.muted_users = None # @experimental
+        self.flood_wait = None # @experimental @maybe-redis
 
     def refresh(self):
         query = {"token": self.token}
@@ -85,7 +84,6 @@ def search_public_room(sorting_number):
 
 
 def search_empty_rooms():
-    
     mongo_collection = Room.mongo_collection
 
     empty_rooms = mongo_collection.find({"participants_count": 0})
