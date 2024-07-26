@@ -74,7 +74,7 @@ async def on_media_group(client: Client, message: Message):
 
 
 async def on_album(client: Client, album: Album):
-    last_album_message = album.messages[-1]
+    # last_album_message = album.messages[-1]
     first_album_message = album.messages[0]
     database_user = DatabaseUser(first_album_message.from_user.id)
     database_user.create()
@@ -129,7 +129,7 @@ async def on_album(client: Client, album: Album):
             room_member,
             database_user,
         )
-        last_album_message.stop_propagation()
+        # last_album_message.stop_propagation()
 
 
 async def send_grouped_messages(

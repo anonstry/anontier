@@ -6,7 +6,7 @@
 
 1. Configure o arquivo `secrets.example.toml`
 2. Inicialize o banco de dados — podemos usar um docker para isso, futuramente
-3. Rode `python -m src` e veja o funcionameno
+3. Rode `hatch run python -m src` e veja o funcionameno
 
 ##### Recommended settings
 Não é preciso muito para rodar sua própria instância. No entanto, até por não usarmos cache no Telegram (algo como copiar as mensagens e usar elas prontas ao invés de sempre montar todas), é bom que tenha uma rápida internet para o envio de mídias (os assets), talvez 100MBs.
