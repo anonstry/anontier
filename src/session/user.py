@@ -1,13 +1,7 @@
-import secrets
 from collections.abc import Generator
 
-from dynaconf import settings
-from pymongo import MongoClient
-
+from src.session import create_token, mongo_database
 from src.session.room import Room
-
-mongo_client = MongoClient(settings.MONGO_CONNECTION_STRING)
-mongo_database = mongo_client[settings.MONGO_DATABASE_NAME]
 
 
 class User:
@@ -17,16 +11,18 @@ class User:
         self.telegram_account_id = telegram_account_id
         self.room_token = room_token
         self.premium = False
-        self.token = secrets.token_hex(16)
-        # self.pseudonome = None # Use Faker
+        self.token = create_token(16)
+        self.protected_transmition = True
+        self.title = "Nothing here yet"
 
     def refresh(self):
         query = {"telegram_account_id": self.telegram_account_id}
-        user_document = self.mongo_collection.find_one(query)
-        assert user_document
-        self.telegram_account_id = user_document["telegram_account_id"]
-        self.room_token = user_document["room_token"]
-        self.premium = user_document["premium"]
+        database_user_document = self.mongo_collection.find_one(query)
+        assert database_user_document
+        self.telegram_account_id = database_user_document["telegram_account_id"]
+        self.room_token = database_user_document["room_token"]
+        self.premium = database_user_document["premium"]
+        self.protected_transmition = database_user_document["protected_transmition"]
 
     def exists(self):
         query = {"telegram_account_id": self.telegram_account_id}
@@ -44,6 +40,7 @@ class User:
                     "telegram_account_id": self.telegram_account_id,
                     "room_token": self.room_token,
                     "premium": self.premium,
+                    "protected_transmition": self.protected_transmition
                 }
             )
 
@@ -104,3 +101,6 @@ def return_all_users() -> Generator[User]:
             user = User(room_member["telegram_account_id"], room_member["room_token"])
             user.refresh()
             yield user
+
+
+DatabaseUser = User
