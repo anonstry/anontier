@@ -1,4 +1,6 @@
+import secrets
 from collections.abc import Generator
+
 from dynaconf import settings
 from pymongo import MongoClient
 
@@ -15,8 +17,8 @@ class User:
         self.telegram_account_id = telegram_account_id
         self.room_token = room_token
         self.premium = False
-        # self.token = secrets.token_hex(16)
-        # active_premium
+        self.token = secrets.token_hex(16)
+        # self.pseudonome = None
 
     def refresh(self):
         query = {"telegram_account_id": self.telegram_account_id}
