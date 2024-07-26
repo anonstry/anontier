@@ -21,3 +21,17 @@
 #         await a.delete()
 #     except:
 #         ...
+
+from hydrogram.client import Client
+from hydrogram.types import Message
+from hydrogram import filters
+
+from asyncio import sleep
+
+from src import client
+
+@client.on_message(filters.private & filters.command("mail"))
+async def send_mail(client: Client, message: Message):
+    loading_message = await message.reply("🕊")
+    await sleep(1.25)
+    await loading_message.edit("I get it!")
