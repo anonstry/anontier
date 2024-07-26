@@ -95,6 +95,8 @@ Não é preciso muito para rodar sua própria instância. No entanto, até por n
 > Mas não sabemos as formas de censura que podem tentar impor, portanto, como proteção, tente optar por Monero.
 > XMR, ou Monero, tem uma intíma ligação com o anonimato e por anos continua sendo resistente à censura.
 
+> **Proteção**
+> Talvez a solução para não usar Redis e usar apenas Mongo localmente (com cópia remota reserva) seja por uma senha para acessar o banco e de alguma forma — talvez com um espaço a mais no Bash — passar ela de forma oculta/temporária.
 
 ## Contact
 Any bugs or something to report, send a e-mail to `anonstry@protonmail.com`
