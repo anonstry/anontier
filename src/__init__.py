@@ -11,15 +11,13 @@ client: Client = Client(
     bot_token=settings.TELEGRAM_BOT_TOKEN,
 )
 
-# repository = Repo(search_parent_directories=True)
+# git_repository = Repo(search_parent_directories=True)
 
-# latest_repository_tag = sorted(
-#     repository.tags, key=lambda tag: tag.commit.committed_datetime
+# latest_git_repository_tag = sorted(
+#     git_repository.tags, key=lambda tag: tag.commit.committed_datetime
 # )[-1].name
-# latest_repository_commit_shorted = repository.git.rev_parse(
+# latest_git_repository_commit_shorted = repository.git.rev_parse(
 #     repository.head.commit.hexsha, short=True
 # )
-# print(f"Lastest repository tag is: {latest_repository_tag}")
-# print(f"Lastest repository commit shorted is {latest_repository_commit_shorted}")
 
 scheduler = AsyncIOScheduler()
