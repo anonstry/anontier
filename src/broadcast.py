@@ -1,11 +1,11 @@
 from hydrogram.client import Client
 
-from src import session
+from src.session.user import search_room_members, return_all_users
 
 
 async def notify_all_users(client: Client, caption: str):
     "Broadcast for all users"
-    for user in session.return_all_users():
+    for user in return_all_users():
         await client.send_message(user.telegram_account_id, text=caption)
 
 
@@ -21,7 +21,7 @@ async def notify_room_members(
     room_members = filter(
         lambda room_member: room_member
         and room_member.telegram_account_id not in exclude_telegram_accounts_ids,
-        session.search_room_members(room_token),
+        search_room_members(room_token),
     )
     for room_member in room_members:
         await client.send_message(room_member.telegram_account_id, text=caption)

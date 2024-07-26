@@ -3,16 +3,10 @@ from pathlib import Path
 from hydrogram import filters
 from hydrogram.client import Client
 from hydrogram.types import Message
-from loguru import logger
 
 from src import client
 from src.session.user import User
 from src.session.room import Room
-
-
-def implement():
-    "Lazy function"
-    logger.info("Module to catch guidelines commands was implemented")
 
 
 @client.on_message(filters.private & filters.command("start"))
