@@ -1,0 +1,6 @@
+pymongo
+hydrogram
+dynaconf
+loguru
+tgcrypto
+apscheduler
