@@ -15,7 +15,7 @@ def delete_empty_rooms():
         room.delete()
 
 
-async def find_blocked_users(client: Client):
+async def remove_blocked_users(client: Client):
     for user in return_all_users():
         try:
             await client.send_chat_action(user.telegram_account_id, ChatAction.PLAYING)
@@ -28,10 +28,15 @@ async def find_blocked_users(client: Client):
                 await broadcast.notify_room_members(client, caption, room_token)
 
 
+async def check_participant_count():
+    "Recount"
+    print("Nothing here yet")
+
+
 def schedule_sanization(client):
     scheduled_tasks = [
         {
-            "func": partial(find_blocked_users, client),
+            "func": partial(remove_blocked_users, client),
             "trigger": "cron",
             "minute": 10,
         },
