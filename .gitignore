@@ -1,2 +1,6 @@
 # Ignore the credentials
 .secrets.toml
+
+
+# Ignore some python files
+**/__pycache__
