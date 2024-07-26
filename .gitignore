@@ -2,7 +2,7 @@
 .secrets.toml
 
 # Ignore some python files
-**/__pycache__
+**/**__pycache__**
 
 # Ignore experimental assets
 assets/experimental
