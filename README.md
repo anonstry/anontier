@@ -16,7 +16,7 @@ Se você quiser colaborar com o projeto, seja bem-vindo para rodar sua própria 
 
 ### Status
 
-* Basic
+* **Basic**
     - [ ] Mailing
     - [ ] Mailing with an invite
     - [ ] Scan all non-registered messages and register them in order
@@ -31,7 +31,7 @@ Se você quiser colaborar com o projeto, seja bem-vindo para rodar sua própria 
     - [ ] Inline mailing
     - [ ] Inline mailing with an invite to your current room
     ~~- [ ] A Random Monero Address (all-sides) for each user~~
-* Specific features
+* **Specific features**
     - [ ] A dockerfile (with alpine)
     - [ ] New filter: `copiable` → if document, video, photo, audio or and animation
 * **Profiles**
