@@ -1,0 +1,1 @@
+# Talvez, se a mídia for um story, ela possa ser baixada e enviada
