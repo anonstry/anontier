@@ -8,6 +8,8 @@ from hydrogram import filters
 from hydrogram.client import Client
 from hydrogram.errors.exceptions.forbidden_403 import UserIsBlocked
 from hydrogram.types import Message
+from hydrogram.errors.exceptions.bad_request_400 import InputUserDeactivated
+
 from loguru import logger
 
 from src.session.message import DatabaseMessage, search_correspondent_replied_message
@@ -159,7 +161,7 @@ async def send_grouped_messages(
                 from_primary_message_token=database_message.token,
             )
             database_new_message.create()
-    except UserIsBlocked:
+    except (UserIsBlocked, InputUserDeactivated):
         room_token = room_member.room_token
         room_member.unlink_room(room_token)
         room_member.delete()
