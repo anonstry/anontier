@@ -34,7 +34,7 @@ async def edit_linked_message_text(client: Client, message: Message):
         await client.edit_message_text(
             database_linked_message.from_telegram_chat_id,
             database_linked_message.telegram_message_id,
-            message.html,
+            message.text.html,
         )
 
 
@@ -66,7 +66,7 @@ async def edit_linked_message_media(client: Client, message: Message):
             await client.edit_message_caption(
                 database_linked_message.from_telegram_chat_id,
                 database_linked_message.telegram_message_id,
-                message.caption or str(), #caption.html
+                message.caption.html or str(),
             )  # Try to edit or delete the caption
 
 
