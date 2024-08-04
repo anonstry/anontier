@@ -1,4 +1,4 @@
-from collections.abc import Generator
+from typing import Iterator
 
 from src.session import create_token, mongo_database
 from src.session.room import Room
@@ -97,7 +97,7 @@ def search_room_members(room_token):
             yield User(room_member["telegram_account_id"], room_member["room_token"])
 
 
-def return_all_users() -> Generator[User]:
+def return_all_users() -> Iterator[User]:
     mongo_collection = User.mongo_collection
 
     room_members = mongo_collection.find()
