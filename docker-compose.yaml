@@ -1,0 +1,29 @@
+services:
+  bot:
+    # build: .
+    container_name: bot
+    command: hatch run python -m src
+    depends_on:
+      - mongo
+    environment:
+      - ENV_FOR_DYNACONF=production
+    # volumes:
+    #   - ./data/telegram/data:/app/
+
+  mongo:
+    image: mongo:latest
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    # environment:
+    #   MONGO_INITDB_ROOT_USERNAME: mongo_user
+    #   MONGO_INITDB_ROOT_PASSWORD: mongo_password
+    #   MONGO_INITDB_DATABASE: mydatabase
+    # volumes:
+    #   - "./data/mongo/data:/data/db"
+    networks:
+      - mongo-compose-network
+
+networks: 
+    mongo-compose-network:
+      driver: bridge
