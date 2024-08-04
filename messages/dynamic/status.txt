@@ -1,4 +1,5 @@
 **The bot is active!**
+{REPOSITORY_REMOTE_LINK}
 
 • **Profile**: @{INSTANCE_USERNAME}__
 • **Last commit:** `#{LAST_COMMIT}`
