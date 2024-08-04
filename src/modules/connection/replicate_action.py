@@ -83,5 +83,8 @@ async def delete_linked_messages(client: Client, messages: list[Message]):
                         database_linked_message.from_telegram_chat_id,
                         database_linked_message.telegram_message_id,
                     )
-                    if linked_message.from_user.username == client.me.username:
+                    if (
+                        linked_message
+                        and linked_message.from_user.username == client.me.username
+                    ):
                         await linked_message.delete()
