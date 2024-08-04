@@ -79,7 +79,7 @@ async def delete_linked_messages(client: Client, messages: list[Message]):
             database_linked_messages = search_linked_messages(database_message.token)
             for database_linked_message in database_linked_messages:
                 with suppress(MessageIdInvalid):  # Instead of "Except"
-                    linked_message = client.get_messages(
+                    linked_message = await client.get_messages(
                         database_linked_message.from_telegram_chat_id,
                         database_linked_message.telegram_message_id,
                     )
