@@ -32,11 +32,12 @@ async def remove_blocked_users(client: Client):
             database_user.delete()
 
 
-# async def search_not_registered_messages(client: Client):
-#     for database_user in return_all_users():
-#         dialog = await client.get_his
-#     async for dialog in client.get_dialogs():
-#         print(dialog.chat.username)
+async def search_not_registered_messages(client: Client):
+    "Rascunho"
+    for database_user in return_all_users():
+        dialog = await client.get_his
+    async for dialog in client.get_dialogs():
+        print(dialog.chat.username)
 
 
 async def check_room_participant_count():
