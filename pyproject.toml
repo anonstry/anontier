@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "anodos"
 dynamic = ["version"]
-description = ''
+description = 'Incognito chat via Telegram'
 readme = "README.md"
 requires-python = ">=3.8"
 license = "MIT"
