@@ -1,5 +1,7 @@
 from loguru import logger
 
+from typing import Iterator
+
 from src.session import mongo_database, create_token
 
 
@@ -83,6 +85,23 @@ def search_linked_messages(primary_message_token):  # maybe include_itself=True
     else:
         logger.error("No linked messages!")
         yield from list()  # Empty list
+
+
+
+def return_all_messages() -> Iterator[DatabaseMessage]:
+    mongo_collection = DatabaseMessage.mongo_collection
+    messages_documents = mongo_collection.find()
+    for message_document in messages_documents:
+        database_message = DatabaseMessage(
+            message_document["from_telegram_chat_id"],
+            message_document["from_room_token"],
+            message_document["telegram_message_id"],
+        )
+        database_message.refresh()
+        yield database_message
+    else:
+        yield from list() # Empty list
+
 
 
 def search_correspondent_replied_message(

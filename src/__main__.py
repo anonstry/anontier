@@ -2,7 +2,7 @@ from hydrogram import idle
 from loguru import logger
 
 from src import client, scheduler
-from src.sanitization import schedule_sanization
+from src.sanitization import schedule_sanization, check_messages_health, search_not_registered_messages
 
 
 async def routine(app):
@@ -14,6 +14,9 @@ async def routine(app):
 
     scheduler.start()
     logger.info("Scheduler worker started")
+
+    # await check_messages_health(app)
+    # await search_not_registered_messages(app)
 
     await idle()
 
