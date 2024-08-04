@@ -84,7 +84,6 @@ async def broadcast(client: Client, message: Message):
                 logger.error(exception)
             else:
                 reply_to_message_id = document_message["telegram_message_id"]
-                print(document_message["telegram_message_id"])
         await send_single_message(
             client,
             message,

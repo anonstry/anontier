@@ -16,7 +16,6 @@ from src.telegram.tools.media import mount_input_media
 
 @Client.on_edited_message(filters.private & filters.text)
 async def edit_linked_message_text(client: Client, message: Message):
-    print(message.id)
     database_user = DatabaseUser(message.from_user.id)
     database_user.create()
     database_user.refresh()
