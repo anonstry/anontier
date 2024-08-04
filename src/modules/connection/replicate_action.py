@@ -85,6 +85,7 @@ async def delete_linked_messages(client: Client, messages: list[Message]):
                     )
                     if (
                         linked_message
+                        and linked_message.from_user
                         and linked_message.from_user.username == client.me.username
                     ):
                         await linked_message.delete()
