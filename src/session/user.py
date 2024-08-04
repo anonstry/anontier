@@ -78,6 +78,12 @@ class User:
         self.modify_linked_room_token(new_room_token=None)
         room.increment_participants_count(-1)
 
+    def set_protected_transmition_false(self):
+        query = {"telegram_account_id": self.telegram_account_id}
+        self.mongo_collection.update_one(
+            query, {"$set": {"protected_transmitio": False}},
+        )
+
 
 def search_room_members(room_token):
     mongo_collection = User.mongo_collection
