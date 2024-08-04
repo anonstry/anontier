@@ -2,14 +2,11 @@ from contextlib import suppress
 
 from hydrogram import filters
 from hydrogram.client import Client
-from hydrogram.errors.exceptions.bad_request_400 import (
-    MessageIdInvalid,
-    MessageNotModified,
-)
+from hydrogram.errors import MessageIdInvalid, MessageNotModified
 from hydrogram.types import Message
 
-from src.session.message import DatabaseMessage
 from src.session.message import (
+    DatabaseMessage,
     search_for_original_messages_with_id,
     search_linked_messages,
 )

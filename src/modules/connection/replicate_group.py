@@ -6,10 +6,8 @@ from typing import Coroutine, TypeVar
 
 from hydrogram import filters
 from hydrogram.client import Client
-from hydrogram.errors.exceptions.forbidden_403 import UserIsBlocked
+from hydrogram.errors import InputUserDeactivated, UserIsBlocked
 from hydrogram.types import Message
-from hydrogram.errors.exceptions.bad_request_400 import InputUserDeactivated
-
 from loguru import logger
 
 from src.session.message import DatabaseMessage, search_correspondent_replied_message
