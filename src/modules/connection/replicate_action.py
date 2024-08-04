@@ -33,6 +33,7 @@ async def edit_linked_message_text(client: Client, message: Message):
             database_linked_message["from_telegram_chat_id"],
             database_linked_message["telegram_message_id"],
             message.text.html,
+            reply_markup=message.reply_markup,
         )
 
 
@@ -57,8 +58,9 @@ async def edit_linked_message_media(client: Client, message: Message):
         try:
             await client.edit_message_media(
                 database_linked_message["from_telegram_chat_id"],
-            database_linked_message["telegram_message_id"],
+                database_linked_message["telegram_message_id"],
                 input_media,
+                reply_markup=message.reply_markup,
             )
         except MessageNotModified:  # The media still the same
             if not message.caption or not message.caption.html:
@@ -69,6 +71,7 @@ async def edit_linked_message_media(client: Client, message: Message):
                 database_linked_message["from_telegram_chat_id"],
                 database_linked_message["telegram_message_id"],
                 new_html_caption,
+                reply_markup=message.reply_markup,
             )  # Try to edit or delete the caption
 
 
