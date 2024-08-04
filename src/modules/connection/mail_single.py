@@ -1,6 +1,9 @@
 """
 Mailing system
 Ainda falta um sistema de correios em grupo (mail_group)
+
+Uma coisa legal para se adicionar seria exclusão.
+Exemplo: /mail -<mention> para todos da sala menos o usuário
 """
 
 from hydrogram.client import Client
@@ -57,6 +60,5 @@ async def send_mail(client: Client, message: Message):
         # expiration = "1 day" # @experimental
     )
     database_new_message.create()
-    await loading_message.delete
-    await message.reply("Mail successfully sent!", quote=True)
+    await loading_message.edit("Mail successfully sent!")
     message.stop_propagation()
