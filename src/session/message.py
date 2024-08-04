@@ -71,21 +71,9 @@ class DatabaseMessage:
 
 def search_linked_messages(primary_message_token):  # maybe include_itself=True
     mongo_collection = DatabaseMessage.mongo_collection
-    database_linked_messages = mongo_collection.find(
+    return mongo_collection.find(
         {"from_primary_message_token": primary_message_token}
     )
-    for database_linked_message in database_linked_messages:
-        database_linked_message = DatabaseMessage(
-            database_linked_message["from_telegram_chat_id"],
-            database_linked_message["from_room_token"],
-            database_linked_message["telegram_message_id"],
-        )
-        database_linked_message.refresh()
-        yield database_linked_message
-    else:
-        logger.error("No linked messages!")
-        yield from list()  # Empty list
-
 
 
 def return_all_messages() -> Iterator[DatabaseMessage]:
@@ -126,13 +114,14 @@ def search_correspondent_replied_message(
         }
     )
     assert database_message_document
-    database_message = DatabaseMessage(
-        from_telegram_chat_id=database_message_document["from_telegram_chat_id"],
-        from_room_token=database_message_document["from_room_token"],
-        telegram_message_id=database_message_document["telegram_message_id"],
-    )
-    database_message.refresh()
-    return database_message
+    return database_message_document
+    # database_message = DatabaseMessage(
+    #     from_telegram_chat_id=database_message_document["from_telegram_chat_id"],
+    #     from_room_token=database_message_document["from_room_token"],
+    #     telegram_message_id=database_message_document["telegram_message_id"],
+    # )
+    # database_message.refresh()
+    # return database_message
 
 
 def search_for_original_messages_with_id(telegram_message_id):

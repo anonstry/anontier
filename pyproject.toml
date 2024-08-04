@@ -30,6 +30,7 @@ dependencies = [
   "dynaconf",
   "loguru",
   "tgcrypto",
+  "pendulum",
   "apscheduler",
   "GitPython",
 ]

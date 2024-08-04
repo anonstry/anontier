@@ -16,6 +16,7 @@ from src.telegram.tools.media import mount_input_media
 
 @Client.on_edited_message(filters.private & filters.text)
 async def edit_linked_message_text(client: Client, message: Message):
+    print(message.id)
     database_user = DatabaseUser(message.from_user.id)
     database_user.create()
     database_user.refresh()
@@ -29,8 +30,8 @@ async def edit_linked_message_text(client: Client, message: Message):
     database_linked_messages = search_linked_messages(database_message.token)
     for database_linked_message in database_linked_messages:
         await client.edit_message_text(
-            database_linked_message.from_telegram_chat_id,
-            database_linked_message.telegram_message_id,
+            database_linked_message["from_telegram_chat_id"],
+            database_linked_message["telegram_message_id"],
             message.text.html,
         )
 
@@ -55,8 +56,8 @@ async def edit_linked_message_media(client: Client, message: Message):
     for database_linked_message in database_linked_messages:
         try:
             await client.edit_message_media(
-                database_linked_message.from_telegram_chat_id,
-                database_linked_message.telegram_message_id,
+                database_linked_message["from_telegram_chat_id"],
+            database_linked_message["telegram_message_id"],
                 input_media,
             )
         except MessageNotModified:  # The media still the same
@@ -65,8 +66,8 @@ async def edit_linked_message_media(client: Client, message: Message):
             else:
                 new_html_caption = message.caption.html
             await client.edit_message_caption(
-                database_linked_message.from_telegram_chat_id,
-                database_linked_message.telegram_message_id,
+                database_linked_message["from_telegram_chat_id"],
+                database_linked_message["telegram_message_id"],
                 new_html_caption,
             )  # Try to edit or delete the caption
 
@@ -81,8 +82,8 @@ async def delete_linked_messages(client: Client, messages: list[Message]):
             for database_linked_message in database_linked_messages:
                 with suppress(MessageIdInvalid):  # Instead of "Except"
                     linked_message = await client.get_messages(
-                        database_linked_message.from_telegram_chat_id,
-                        database_linked_message.telegram_message_id,
+                        database_linked_message["from_telegram_chat_id"],
+                        database_linked_message["telegram_message_id"],
                     )
                     if (
                         linked_message

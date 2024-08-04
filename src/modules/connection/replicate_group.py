@@ -107,7 +107,7 @@ async def on_album(client: Client, album: Album):
                     telegram_message_id=first_album_message.reply_to_message_id,
                 )
                 database_reply_to_message.refresh()
-                database_message = search_correspondent_replied_message(
+                message_document = search_correspondent_replied_message(
                     where_telegram_chat_id=room_member.telegram_account_id,
                     where_room_token=room_member.room_token,
                     with_primary_message_token=database_reply_to_message.from_primary_message_token
@@ -117,7 +117,7 @@ async def on_album(client: Client, album: Album):
                 exception = "Could not find which message(s) is being replied in the current room!"
                 logger.error(exception)
             else:
-                reply_to_message_id = database_message.telegram_message_id
+                reply_to_message_id = message_document["telegram_message_id"]
         await send_grouped_messages(
             client,
             album.messages,

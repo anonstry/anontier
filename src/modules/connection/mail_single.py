@@ -10,6 +10,7 @@ from hydrogram.client import Client
 from hydrogram.types import Message
 from hydrogram import filters
 from hydrogram.errors import UsernameInvalid
+from hydrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 
 from src.session.user import DatabaseUser
@@ -57,10 +58,12 @@ async def send_mail(client: Client, message: Message):
     database_target_user.create()
     database_target_user.refresh()
     loading_message = await message.reply("🕊")
+    button = InlineKeyboardButton("✉️ Mail • Não-respondível", "mail_guide")
     new_message = await message.copy(
         target_peer.user_id,
         remove_text_command(message),
         protect_content=database_user.protected_transmition,
+        reply_markup=InlineKeyboardMarkup([[button]])
     )
     database_new_message = DatabaseMessage(
         from_telegram_chat_id=database_target_user.telegram_account_id,
