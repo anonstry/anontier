@@ -91,7 +91,7 @@ def search_correspondent_replied_message(
     with_primary_message_token,
 ):
     mongo_collection = DatabaseMessage.mongo_collection
-    correspondent_database_message = mongo_collection.find_one(
+    database_message_document = mongo_collection.find_one(
         {
             "from_telegram_chat_id": where_telegram_chat_id,
             "from_room_token": where_room_token,
@@ -106,15 +106,14 @@ def search_correspondent_replied_message(
             ],
         }
     )
-    assert correspondent_database_message
-    # database_message = DatabaseMessage(
-    #     from_telegram_chat_id=correspondent_database_message["from_telegram_chat_id"],
-    #     from_room_token=correspondent_database_message["from_room_token"],
-    #     telegram_message_id=correspondent_database_message["telegram_message_id"],
-    # )
-    # database_message.refresh()
-    # return database_message
-    return correspondent_database_message
+    assert database_message_document
+    database_message = DatabaseMessage(
+        from_telegram_chat_id=database_message_document["from_telegram_chat_id"],
+        from_room_token=database_message_document["from_room_token"],
+        telegram_message_id=database_message_document["telegram_message_id"],
+    )
+    database_message.refresh()
+    return database_message
 
 
 def search_for_original_messages_with_id(telegram_message_id):
