@@ -29,17 +29,18 @@ async def edit_linked_message_text(client: Client, message: Message):
     database_message.refresh()
     database_linked_messages = search_linked_messages(database_message.token)
     for database_linked_message in database_linked_messages:
-        await client.edit_message_text(
+        linked_message = await client.get_messages(
             database_linked_message["from_telegram_chat_id"],
             database_linked_message["telegram_message_id"],
+        )
+        await linked_message.edit(
             message.text.html,
-            reply_markup=message.reply_markup,
+            reply_markup=linked_message.reply_markup,
         )
 
 
 @Client.on_edited_message(filters.private & filters.media)
 async def edit_linked_message_media(client: Client, message: Message):
-    print("Message media")
     database_user = DatabaseUser(message.from_user.id)
     database_user.create()
     database_user.refresh()
@@ -55,23 +56,23 @@ async def edit_linked_message_media(client: Client, message: Message):
     input_media = await mount_input_media(client, message, message_media)
     assert input_media
     for database_linked_message in database_linked_messages:
-        try:
-            await client.edit_message_media(
-                database_linked_message["from_telegram_chat_id"],
-                database_linked_message["telegram_message_id"],
+        linked_message = await client.get_messages(
+            database_linked_message["from_telegram_chat_id"],
+            database_linked_message["telegram_message_id"],
+        )
+        with suppress(MessageNotModified):
+            await linked_message.edit_media(
                 input_media,
-                reply_markup=message.reply_markup,
+                reply_markup=linked_message.reply_markup,
             )
-        except MessageNotModified:  # The media still the same
-            if not message.caption or not message.caption.html:
-                new_html_caption = str()
-            else:
+        with suppress(MessageNotModified):
+            if message.caption and message.caption.html:
                 new_html_caption = message.caption.html
-            await client.edit_message_caption(
-                database_linked_message["from_telegram_chat_id"],
-                database_linked_message["telegram_message_id"],
+            else:
+                new_html_caption = str()
+            await linked_message.edit_caption(
                 new_html_caption,
-                reply_markup=message.reply_markup,
+                reply_markup=linked_message.reply_markup,
             )  # Try to edit or delete the caption
 
 
