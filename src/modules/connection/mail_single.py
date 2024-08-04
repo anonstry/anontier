@@ -10,6 +10,7 @@ from hydrogram.errors import UsernameInvalid
 
 
 from src.session.user import DatabaseUser
+from src.session.message import DatabaseMessage
 
 
 @Client.on_message(filters.private & filters.command("mail") & ~filters.media_group)
@@ -17,6 +18,13 @@ async def send_mail(client: Client, message: Message):
     database_user = DatabaseUser(message.from_user.id)
     database_user.create()
     database_user.refresh()
+    database_message = DatabaseMessage(
+        from_telegram_chat_id=message.chat.id,
+        from_room_token=database_user.room_token,
+        telegram_message_id=message.id,
+    )
+    database_message.create()
+    database_message.refresh()
     try:
         target_mention = message.command[1]
     except IndexError:
@@ -32,10 +40,23 @@ async def send_mail(client: Client, message: Message):
     except AssertionError:
         await message.reply("Mail could not be sent. Target is not a user.")
         return
+    database_target_user = DatabaseUser(message.from_user.id)
+    database_target_user.create()
+    database_target_user.refresh()
     loading_message = await message.reply("🕊")
-    await message.copy(
+    new_message = await message.copy(
         target_peer.user_id,
         protect_content=database_user.protected_transmition,
     )
-    await loading_message.edit("Mail successfully sent!")
+    database_new_message = DatabaseMessage(
+        from_telegram_chat_id=database_target_user.telegram_account_id,
+        from_room_token=database_target_user.room_token,
+        telegram_message_id=new_message.id,
+        from_primary_room_token=database_user.room_token,
+        from_primary_message_token=database_message.token,
+        # expiration = "1 day" # @experimental
+    )
+    database_new_message.create()
+    await loading_message.delete
+    await message.reply("Mail successfully sent!", quote=True)
     message.stop_propagation()
