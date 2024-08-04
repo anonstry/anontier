@@ -16,6 +16,11 @@ from src.session.user import DatabaseUser
 from src.session.message import DatabaseMessage
 
 
+def remove_text_command(message):
+    caption_html = (message.text or message.caption).html
+    return caption_html.split(maxsplit=2)[-1]
+
+
 @Client.on_message(filters.private & filters.command("mail") & ~filters.media_group)
 async def send_mail(client: Client, message: Message):
     database_user = DatabaseUser(message.from_user.id)
@@ -49,6 +54,7 @@ async def send_mail(client: Client, message: Message):
     loading_message = await message.reply("🕊")
     new_message = await message.copy(
         target_peer.user_id,
+        remove_text_command(message),
         protect_content=database_user.protected_transmition,
     )
     database_new_message = DatabaseMessage(
