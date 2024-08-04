@@ -14,7 +14,7 @@ from src.session.message import (
     search_linked_messages,
 )
 from src.session.user import DatabaseUser
-from src.telegram.methods import mount_input_media
+from src.telegram.tools.media import mount_input_media
 
 
 @Client.on_edited_message(filters.private & filters.text)
