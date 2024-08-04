@@ -1,5 +1,5 @@
 from dynaconf import settings
-from hydrogram import Client
+from hydrogram.client import Client
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from git.repo import Repo
