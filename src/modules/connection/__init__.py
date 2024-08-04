@@ -4,7 +4,7 @@ from hydrogram.raw.types import UpdateBotStopped
 from hydrogram.types import Message, Update
 from loguru import logger
 
-from src.sanitize import delete_empty_rooms
+from src.sanitization import delete_empty_rooms
 from src.session.room import Room, search_public_room
 from src.session.user import DatabaseUser
 from src.telegram.filters.room import filter_room_linked
