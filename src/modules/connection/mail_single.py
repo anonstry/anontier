@@ -17,8 +17,8 @@ from src.session.message import DatabaseMessage
 
 
 def remove_text_command(message):
-    caption_html = (message.text or message.caption).html
-    return caption_html.split(maxsplit=2)[-1]
+    caption = message.text or message.caption
+    return caption.html.split(maxsplit=2)[-1]
 
 
 @Client.on_message(filters.private & filters.command("mail") & ~filters.media_group)
