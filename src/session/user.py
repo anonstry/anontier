@@ -33,10 +33,8 @@ class User:
 
     def create(self, duplicate=False):
         if not duplicate and self.exists():
-            # print("User exists")
             return
         else:
-            # print("User not exist")
             self.mongo_collection.insert_one(
                 {
                     "telegram_account_id": self.telegram_account_id,
@@ -73,6 +71,8 @@ class User:
         room.increment_participants_count()
 
     def unlink_room(self, room_token):
+        if not room_token:
+            return
         room = Room(token=room_token)
         room.refresh()
         self.modify_linked_room_token(new_room_token=None)
