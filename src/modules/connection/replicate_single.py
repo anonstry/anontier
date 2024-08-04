@@ -1,14 +1,13 @@
 from hydrogram import filters
 from hydrogram.client import Client
-from hydrogram.errors.exceptions.forbidden_403 import UserIsBlocked
+from hydrogram.errors import InputUserDeactivated, UserIsBlocked
 from hydrogram.types import Message
 from loguru import logger
-from hydrogram.errors.exceptions.bad_request_400 import InputUserDeactivated
 
-from src.telegram.filters.room import filter_room_linked
 from src.session.message import DatabaseMessage, search_correspondent_replied_message
 from src.session.user import User as DatabaseUser
 from src.session.user import search_room_members
+from src.telegram.filters.room import filter_room_linked
 
 
 async def send_single_message(
