@@ -1,4 +1,8 @@
+# Adicionar algo para verificar se houve
+# alguma mensagem não registradas (ex.: as últimas 10)
+
 from functools import partial
+from contextlib import suppress
 
 from hydrogram.client import Client
 from hydrogram.enums import ChatAction
@@ -6,16 +10,11 @@ from hydrogram.errors import InputUserDeactivated, UserIsBlocked
 from loguru import logger
 
 from src import scheduler
-from src.session.room import search_empty_rooms
-from src.session.user import return_all_users
-from src.session.message import return_all_messages
-
-
-def delete_empty_rooms():
-    logger.debug("Searching for all empty rooms...")
-    "Delete rooms with no linked users"
-    for room in search_empty_rooms():
-        room.delete()
+from src.database.room import delete_empty_rooms, return_all_rooms, Room
+from src.database.user import return_all_users, search_room_members
+from src.database.message import return_all_expired_messages
+from src.database.subscription import deactivate_expired_premium_subscriptions
+from src.database.restriction import delete_expired_user_blocks
 
 
 async def remove_blocked_users(client: Client):
@@ -32,26 +31,43 @@ async def remove_blocked_users(client: Client):
             database_user.delete()
 
 
-async def search_not_registered_messages(client: Client):
-    "Rascunho"
-    for database_user in return_all_users():
-        dialog = await client.get_his
-    async for dialog in client.get_dialogs():
-        print(dialog.chat.username)
+async def check_room_participant_count(client: Client):
+    logger.debug("Recounting all room participants...")
+    for document in return_all_rooms():
+        room = Room(document["token"])
+        room.refresh()
+        participants_count = 0
+        for room_member in search_room_members(room.token):
+            with suppress(UserIsBlocked, InputUserDeactivated):
+                await client.send_chat_action(
+                    room_member.telegram_account_id,
+                    ChatAction.PLAYING,
+                )
+                participants_count += 1
+            room.increment_participants_count(-room.participants_count)  # Zero
+            room.increment_participants_count(participants_count)
 
 
-async def check_room_participant_count():
-    "Recount"
-    print("Nothing here yet")
+# async def check_messages_health(client: Client):
+#     logger.debug("Searching for all messages health...")
+#     for database_message in return_all_messages():
+#         await client.get_messages(
+#             database_message.where_telegram_chat_id,
+#             database_message.telegram_message_id,
+#         )
 
 
-async def check_messages_health(client: Client):
-    logger.debug("Searching for all messages health...")
-    for database_message in return_all_messages():
-        await client.get_messages(
-            database_message.from_telegram_chat_id,
-            database_message.telegram_message_id,
-        )
+async def delete_messages_with_expired_lifetime(client: Client):
+    logger.debug("Searching for all expired messages lifetime...")
+    for database_message in return_all_expired_messages():
+        try:
+            await client.delete_messages(
+                database_message.where_telegram_chat_id,
+                database_message.telegram_message_id,
+            )
+            database_message.delete()
+        except Exception as exception:
+            logger.error(exception)
 
 
 def schedule_sanization(client):
@@ -59,12 +75,32 @@ def schedule_sanization(client):
         {
             "func": partial(remove_blocked_users, client),
             "trigger": "cron",
-            "minute": 10,
+            "minute": 1,
+        },
+        {
+            "func": partial(check_room_participant_count, client),
+            "trigger": "cron",
+            "minute": 1,
+        },
+        {
+            "func": partial(delete_messages_with_expired_lifetime, client),
+            "trigger": "cron",
+            "minute": 1,
         },
         {
             "func": delete_empty_rooms,
             "trigger": "cron",
-            "second": 1,
+            "minute": 1,
+        },
+        {
+            "func": deactivate_expired_premium_subscriptions,
+            "trigger": "cron",
+            "hour": 1,
+        },
+        {
+            "func": delete_expired_user_blocks, # restrictions
+            "trigger": "cron",
+            "minute": 1,
         },
     ]
     for scheduled_task in scheduled_tasks:

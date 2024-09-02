@@ -10,9 +10,10 @@ from hydrogram.errors import InputUserDeactivated, UserIsBlocked
 from hydrogram.types import Message
 from loguru import logger
 
-from src.session.message import DatabaseMessage, search_correspondent_replied_message
-from src.session.user import User as DatabaseUser
-from src.session.user import search_room_members
+from src.database.message import DatabaseMessage, return_correspondent_message
+from src.database.user import DatabaseUser, search_room_members
+from src.database.restriction import check_user_block
+from src.modules.connection import add_message_header
 from src.telegram.filters.room import filter_room_linked
 from src.telegram.modded.copy_media_group import copy_media_group
 
@@ -78,11 +79,12 @@ async def on_album(client: Client, album: Album):
     first_album_message = album.messages[0]
     database_user = DatabaseUser(first_album_message.from_user.id)
     database_user.create()
-    database_user.refresh()
+    database_user.reload()
     database_messages = [
         DatabaseMessage(
-            from_telegram_chat_id=message.chat.id,
-            from_room_token=database_user.room_token,
+            label="bridge",
+            where_telegram_chat_id=message.chat.id,
+            where_room_token=database_user.room_token,
             telegram_message_id=message.id,
         )
         for message in album.messages
@@ -98,20 +100,26 @@ async def on_album(client: Client, album: Album):
         )
     )
     for room_member in room_members:
+        if check_user_block(
+            where_room_token=database_user.room_token,
+            telegram_account_id=first_album_message.from_user.id,
+            applied_by_telegram_account_id=room_member.telegram_account_id,
+        ):
+            return
         reply_to_message_id = None
         if first_album_message.reply_to_message_id:
             try:
                 database_reply_to_message = DatabaseMessage(
-                    from_telegram_chat_id=first_album_message.chat.id,
-                    from_room_token=room_member.room_token,
+                    where_telegram_chat_id=first_album_message.chat.id,
+                    where_room_token=room_member.room_token,
                     telegram_message_id=first_album_message.reply_to_message_id,
                 )
                 database_reply_to_message.refresh()
-                message_document = search_correspondent_replied_message(
+                message_document = return_correspondent_message(
                     where_telegram_chat_id=room_member.telegram_account_id,
                     where_room_token=room_member.room_token,
-                    with_primary_message_token=database_reply_to_message.from_primary_message_token
-                    or database_reply_to_message.token,
+                    linked_root_message_identifier=database_reply_to_message.from_root_message_token
+                    or database_reply_to_message.identifier,
                 )
             except AssertionError:
                 exception = "Could not find which message(s) is being replied in the current room!"
@@ -137,6 +145,11 @@ async def send_grouped_messages(
     room_member: DatabaseUser,
     from_database_user: DatabaseUser,
 ):
+    # Aqui precisamos melhorar
+    # Provavelmente será necessário uma
+    # forma de registrar todos os albums
+    # e tambem todos as mensagens single como um album,
+    # para quando for editar uma mensagem: sempre edite a primeira.
     first_album_message = messages[0]
     try:
         new_messages = await copy_media_group(
@@ -145,15 +158,20 @@ async def send_grouped_messages(
             first_album_message.chat.id,
             first_album_message.id,
             reply_to_message_id=reply_to_message_id,
-            protect_content=from_database_user.protected_transmition,
+            protect_content=True,
+            captions=[
+                add_message_header(message, from_database_user) for message in messages
+            ][0],  # Apenas a legenda da primeira mensagem é preservada,
         )
         for new_message, database_message in zip(new_messages, database_messages):
             database_new_message = DatabaseMessage(
-                from_telegram_chat_id=room_member.telegram_account_id,
-                from_room_token=room_member.room_token,
+                label=database_message.label,
+                where_telegram_chat_id=room_member.telegram_account_id,
+                where_room_token=room_member.room_token,
                 telegram_message_id=new_message.id,
-                from_primary_room_token=room_member.room_token,
-                from_primary_message_token=database_message.token,
+                from_root_room_token=room_member.room_token,
+                from_root_message_token=database_message.identifier,
+                expiration_timestamp=database_message.expiration_timestamp,
             )
             database_new_message.create()
     except (UserIsBlocked, InputUserDeactivated):

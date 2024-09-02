@@ -1,2 +1,0 @@
-**Hello!**
-Try /manual for instructions, or a simple /match

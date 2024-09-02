@@ -33,6 +33,8 @@ dependencies = [
   "pendulum",
   "apscheduler",
   "GitPython",
+  "mongoengine",
+  "faker",
 ]
 
 [project.urls]

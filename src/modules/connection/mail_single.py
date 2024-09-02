@@ -4,6 +4,9 @@ Ainda falta um sistema de correios em grupo (mail_group)
 
 Uma coisa legal para se adicionar seria exclusão.
 Exemplo: /mail -<mention> para todos da sala menos o usuário
+
+To do:
+    Messages with more than 800 characters: split in two or more parts
 """
 
 from contextlib import suppress
@@ -20,8 +23,9 @@ from hydrogram.errors import (
 )
 from hydrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
 
-from src.session.message import DatabaseMessage
-from src.session.user import DatabaseUser
+from src.database.message import DatabaseMessage
+from src.database.user import DatabaseUser
+from src.modules.connection import add_message_header
 
 
 def remove_text_command(message):
@@ -38,10 +42,10 @@ def remove_text_command(message):
 async def send_mail(client: Client, message: Message):
     database_user = DatabaseUser(message.from_user.id)
     database_user.create()
-    database_user.refresh()
+    database_user.reload()
     database_message = DatabaseMessage(
-        from_telegram_chat_id=message.chat.id,
-        from_room_token=database_user.room_token,
+        where_telegram_chat_id=message.chat.id,
+        where_room_token=database_user.room_token,
         telegram_message_id=message.id,
     )
     database_message.create()
@@ -63,30 +67,34 @@ async def send_mail(client: Client, message: Message):
         return
     database_target_user = DatabaseUser(message.from_user.id)
     database_target_user.create()
-    database_target_user.refresh()
+    database_target_user.reload()
     loading_message = await message.reply("🕊")
     button = InlineKeyboardButton("✉️ Mail • Não-respondível", "mail_guide")
     with suppress(PeerIdInvalid):
-        new_message = await message.copy(
-            target_peer.user_id,
-            remove_text_command(message), # maybe put it after every message.edit
-            protect_content=database_user.protected_transmition,
-            reply_markup=InlineKeyboardMarkup([[button]]),
-        )
+        if message.text:
+            new_message = await client.send_message(
+                target_peer.user_id,
+                add_message_header(message, database_user),
+                protect_content=True,
+                reply_markup=InlineKeyboardMarkup([[button]]),
+            )
+        else:
+            new_message = await message.copy(
+                target_peer.user_id,
+                add_message_header(message, database_user),
+                protect_content=True,
+                reply_markup=InlineKeyboardMarkup([[button]]),
+            )
         database_new_message = DatabaseMessage(
-            from_telegram_chat_id=database_target_user.telegram_account_id,
-            from_room_token=database_target_user.room_token,
+            label="bridge",
+            where_telegram_chat_id=database_target_user.telegram_account_id,
+            where_room_token=database_target_user.room_token,
             telegram_message_id=new_message.id,
-            from_primary_room_token=database_target_user.room_token,
-            from_primary_message_token=database_message.token,
-            # expiration = "1 day" # @experimental
+            from_root_room_token=database_target_user.room_token,
+            from_root_message_token=database_message.identifier,
+            expiration_timestamp=database_message.expiration_timestamp,
         )
         database_new_message.create()
-        # with suppress(MessageNotModified, MessageEmpty):
-        #     await new_message.edit_caption(
-        #         remove_text_command(message) or "Just an empty message...",
-        #         reply_markup=InlineKeyboardMarkup([[button]]),
-        #     )
     await loading_message.edit("Mail successfully sent!")
     # logger.debug("Stopping mailing command propagation...")
     message.stop_propagation()

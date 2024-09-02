@@ -5,7 +5,7 @@ from hydrogram.client import Client
 from hydrogram.enums import ChatAction
 from hydrogram.types import Message
 
-from src.session.user import DatabaseUser
+from src.database.user import DatabaseUser
 from src.telegram.filters.room import filter_room_linked
 
 
@@ -13,11 +13,18 @@ from src.telegram.filters.room import filter_room_linked
 async def initialize(client: Client, message: Message):
     database_user = DatabaseUser(message.from_user.id)
     database_user.create()
-    database_user.refresh()
-    file = Path("messages/initialization.txt")
-    caption = file.read_text()
-    await message.reply(text=caption, quote=True)
+    database_user.reload()
+    caption = Path("assets/texts/initialization.txt").read_text()
+    filepath = Path("assets/images/initialization.jpg")
+    await message.reply_photo(str(filepath), quote=True, caption=caption)
     message.stop_propagation()
+
+
+@Client.on_message(filters.private & ~filters.regex("^/") & ~filter_room_linked)
+async def suggest_match(client: Client, message: Message):
+    caption = "You are not into a conversation yet. Try /match"
+    await message.reply(caption, quote=True)
+    message.stop_propagation
 
 
 @Client.on_message(filters.group)

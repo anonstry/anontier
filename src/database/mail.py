@@ -1,4 +1,4 @@
-from src.session import mongo_database
+from src.database import mongo_database
 
 
 class DatabaseMail:

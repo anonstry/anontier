@@ -1,30 +1,31 @@
 from typing import Iterator
 
-from src.session import create_token, mongo_database
-from src.session.room import Room
+from src.database import create_token, create_username, mongo_database
+from src.database.room import Room
 
 
-class User:
+class DatabaseUser:
     mongo_collection = mongo_database["users"]
 
     def __init__(self, telegram_account_id, room_token=None):
         self.telegram_account_id = telegram_account_id
         self.room_token = room_token
+        self.hidden = False
         self.premium = False
-        self.token = create_token(16)
-        self.protected_transmition = True
-        self.title = "Nothing here yet"
+        self.username = create_username(2)
+        self.identifier = create_token(16)
+        self.deactivated = False
 
-    def refresh(self):
+    def reload(self):
         query = {"telegram_account_id": self.telegram_account_id}
         database_user_document = self.mongo_collection.find_one(query)
-        assert database_user_document
         self.telegram_account_id = database_user_document["telegram_account_id"]
         self.room_token = database_user_document["room_token"]
+        self.hidden = database_user_document["hidden"]
         self.premium = database_user_document["premium"]
-        self.protected_transmition = database_user_document.get(
-            "protected_transmition", True
-        )
+        self.username = database_user_document["username"]
+        self.identifier = database_user_document["identifier"]
+        self.deactivated = database_user_document["deactivated"]
 
     def exists(self):
         query = {"telegram_account_id": self.telegram_account_id}
@@ -39,8 +40,11 @@ class User:
                 {
                     "telegram_account_id": self.telegram_account_id,
                     "room_token": self.room_token,
+                    "hidden": self.hidden,
                     "premium": self.premium,
-                    "protected_transmition": self.protected_transmition,
+                    "username": self.username,
+                    "identifier": self.identifier,
+                    "deactivated": self.deactivated,
                 }
             )
 
@@ -78,37 +82,85 @@ class User:
         self.modify_linked_room_token(new_room_token=None)
         room.increment_participants_count(-1)
 
-    def set_protected_transmition_false(self):
+    def set_new_username(self):
         query = {"telegram_account_id": self.telegram_account_id}
         self.mongo_collection.update_one(
-            query, {"$set": {"protected_transmitio": False}},
+            query,
+            {"$set": {"username": create_username()}},
+        )
+
+    def set_hidden_true(self):
+        query = {"telegram_account_id": self.telegram_account_id}
+        self.mongo_collection.update_one(
+            query,
+            {"$set": {"hidden": True}},
+        )
+
+    def set_hidden_false(self):
+        query = {"telegram_account_id": self.telegram_account_id}
+        self.mongo_collection.update_one(
+            query,
+            {"$set": {"hidden": False}},
+        )
+
+    def set_premium_true(self):
+        query = {"telegram_account_id": self.telegram_account_id}
+        self.mongo_collection.update_one(
+            query,
+            {"$set": {"premium": True}},
+        )
+
+    def set_premium_false(self):
+        query = {"telegram_account_id": self.telegram_account_id}
+        self.mongo_collection.update_one(
+            query,
+            {"$set": {"premium": False}},
         )
 
 
 def search_room_members(room_token):
-    mongo_collection = User.mongo_collection
-
+    mongo_collection = DatabaseUser.mongo_collection
     room_members = mongo_collection.find({"room_token": room_token})
     room_members = list(room_members)
     if not room_members:
         return
     else:
         for room_member in room_members:
-            yield User(room_member["telegram_account_id"], room_member["room_token"])
+            yield DatabaseUser(
+                room_member["telegram_account_id"],
+                room_member["room_token"],
+            )
 
 
-def return_all_users() -> Iterator[User]:
-    mongo_collection = User.mongo_collection
-
+def return_all_users() -> Iterator[DatabaseUser]:
+    mongo_collection = DatabaseUser.mongo_collection
     room_members = mongo_collection.find()
     room_members = list(room_members)
     if not room_members:
         return
     else:
         for room_member in room_members:
-            user = User(room_member["telegram_account_id"], room_member["room_token"])
-            user.refresh()
+            user = DatabaseUser(
+                room_member["telegram_account_id"],
+                room_member["room_token"],
+            )
+            user.reload()
             yield user
 
 
-DatabaseUser = User
+# def deactivate_user(telegram_account_id):
+#     DatabaseUser.mongo_collection.update_one(
+#         {"telegram_account_id": telegram_account_id},
+#         {
+#             "$set": {"deactivated": True},
+#         },
+#     )
+
+
+# def reactivate_user(telegram_account_id):
+#     DatabaseUser.mongo_collection.update_one(
+#         {"telegram_account_id": telegram_account_id},
+#         {
+#             "$set": {"deactivated": False},
+#         },
+#     )

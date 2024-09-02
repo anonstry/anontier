@@ -1,9 +1,0 @@
-**You can just block or/and close the bot.** __And if you block the bot, all messages and your bot account will be deleted.__
-
-
-1. Remember that forwarding is blocked.
-2. Delete the chat and lose everything.
-
-
-Telegram Terms of Service → see telegram.org/tos.
-<blockquote>__A mensagens recebidas podem vir de pessoas aleatórias, anônimas. E as mensagens não são revisadas. Tenha sua própria auto-moderação e cuidado.__</blockquote>

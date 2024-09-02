@@ -1,12 +1,14 @@
+# Move to src.modules
+
 from hydrogram import filters
 from hydrogram.client import Client
 from hydrogram.raw.types import UpdateBotStopped
 from hydrogram.types import Message, Update
 from loguru import logger
 
+from src.database.room import Room, search_public_room
+from src.database.user import DatabaseUser
 from src.sanitization import delete_empty_rooms
-from src.session.room import Room, search_public_room
-from src.session.user import DatabaseUser
 from src.telegram.filters.room import filter_room_linked
 
 
@@ -14,13 +16,14 @@ from src.telegram.filters.room import filter_room_linked
 async def bot_stopped(client: Client, update: Update, _, __):
     if isinstance(update, UpdateBotStopped) and update.stopped:
         database_user = DatabaseUser(update.user_id)
-        database_user.refresh()
+        database_user.reload()
         room_token = database_user.room_token
         assert room_token
         database_user.unlink_room(room_token)
         database_user.delete()
         # caption = "__A member of your current room blocked the bot. See about the current /status!__"
         # await notify_room_members(client, caption, room_token)
+
 
 @Client.on_message(filters.private & filters.command("unmatch") & ~filter_room_linked)
 async def suggest_match(client: Client, message: Message):
@@ -43,7 +46,7 @@ async def suggest_unmatch(client: Client, message: Message):
 @Client.on_message(filters.private & filters.command("unmatch") & filter_room_linked)
 async def quit_room(client: Client, message: Message):
     database_user = DatabaseUser(message.from_user.id)
-    database_user.refresh()
+    database_user.reload()
     room = Room(database_user.room_token)
     database_user.unlink_room(room.token)
     caption = "You left the room."
@@ -59,7 +62,7 @@ async def quit_room(client: Client, message: Message):
 @Client.on_message(filters.private & filters.command("match") & ~filter_room_linked)
 async def match_room(client: Client, message: Message):
     database_user = DatabaseUser(message.from_user.id)
-    database_user.refresh()
+    database_user.reload()
     try:
         sorting_number = int(message.command[1])
     except (IndexError, ValueError, Exception):  # Not exists or not integer
@@ -95,7 +98,7 @@ async def match_room(client: Client, message: Message):
 @Client.on_message(filters.private & filters.command("party") & ~filter_room_linked)
 async def create_party(client: Client, message: Message):
     database_user = DatabaseUser(message.from_user.id)
-    database_user.refresh()
+    database_user.reload()
     try:
         room_size_limit = message.command[1]
     except IndexError:
@@ -108,11 +111,15 @@ async def create_party(client: Client, message: Message):
         caption = "You must provide a valid room size number!"
         await message.reply(text=caption, quote=True, protect_content=True)
         return
-    if room_size_limit < 0:
+    if room_size_limit < 0:  # -1 or less
         hidden = True
     else:
         hidden = False
     room_size_limit = abs(room_size_limit)
+    if room_size_limit > 3 and not database_user.premium:
+        caption = "You are not a /premium user to create a room bigger than 3."
+        await message.reply(caption, quote=True)
+        return
     room = Room(size_limit=room_size_limit, hidden=hidden)
     room.create()
     room.refresh()
@@ -135,7 +142,7 @@ async def create_party(client: Client, message: Message):
 @Client.on_message(filters.private & filters.command("join") & ~filter_room_linked)
 async def join_room(client: Client, message: Message):
     database_user = DatabaseUser(message.from_user.id)
-    database_user.refresh()
+    database_user.reload()
     room_token = None
     try:
         room_token = message.command[1]
@@ -166,3 +173,22 @@ async def join_room(client: Client, message: Message):
     #     exclude_telegram_accounts_ids=[user.telegram_account_id],
     # )
     message.stop_propagation()
+
+
+def add_message_header(message: Message, database_user: DatabaseUser):  # _parser
+    caption = message.caption or message.text
+    if database_user.premium:
+        symbol = "❖"
+    else:
+        symbol = "✰"
+    if not database_user.hidden:
+        if not caption or not caption.html:
+            return f"**{symbol} {database_user.username}**"
+        else:
+            return f"**{symbol} {database_user.username}**\n{caption.html}"
+    else:
+        # return caption.html
+        if not caption or not caption.html:
+            return f"{symbol} **Unknown user** — hidden."
+        else:
+            return f"{symbol} **Unknown user** — hidden.\n{caption.html}"

@@ -1,7 +1,9 @@
+# Talvez como um logger/brodcaster de DEBUG=True
+
+
 from hydrogram.client import Client
 
-from src.session.user import search_room_members, return_all_users
-
+from src.database.user import return_all_users, search_room_members
 
 async def notify_all_users(client: Client, caption: str):
     "Broadcast for all users"

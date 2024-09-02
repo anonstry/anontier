@@ -3,13 +3,13 @@ from hydrogram.filters import Filter
 from hydrogram.client import Client
 from hydrogram.types import Message
 
-from src.session.user import DatabaseUser
+from src.database.user import DatabaseUser
 
 
 async def check_room_linked(_: Filter, __: Client, message: Message):
     database_user = DatabaseUser(message.from_user.id)
     database_user.create()
-    database_user.refresh()
+    database_user.reload()
     if not database_user.room_token:
         return False  # User is not linked to a room
     else:

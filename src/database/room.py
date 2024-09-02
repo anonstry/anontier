@@ -1,4 +1,8 @@
-from src.session import mongo_database, create_token
+from typing import Iterator
+
+from loguru import logger
+
+from src.database import mongo_database, create_token
 
 
 class Room:
@@ -6,17 +10,10 @@ class Room:
 
     def __init__(self, token=None, size_limit=2, hidden=False):
         self.token = token or create_token(24)
-        self.size_limit = max(2, size_limit)  # No lower than 2
-        self.size_limit = min(10, self.size_limit)  # No higher than 10 (if not premium)
+        self.size_limit = min(min(2, size_limit), 100)
         self.hidden = hidden
         self.participants_count = 0
-        self.title = None # @experimental
-        self.obrigatory_rules = None # @experimental
-        self.restricted_users = None # @experimental
-        self.restricted_rights = None # @experimental
-        self.not_permited_users = None # @experimental
-        self.muted_users = None # @experimental
-        self.flood_wait = None # @experimental @maybe-redis
+        self.title = None  # @experimental
 
     def refresh(self):
         query = {"token": self.token}
@@ -59,10 +56,8 @@ class Room:
 
 
 def search_public_room(sorting_number):
-    mongo_collection = Room.mongo_collection
-
     sorting_number = -1 if sorting_number < 0 else 1
-    room_document = mongo_collection.find_one(
+    room_document = Room.mongo_collection.find_one(
         filter={
             "hidden": False,
             "$and": [
@@ -83,9 +78,7 @@ def search_public_room(sorting_number):
 
 
 def search_empty_rooms():
-    mongo_collection = Room.mongo_collection
-
-    empty_rooms = mongo_collection.find({"participants_count": 0})
+    empty_rooms = Room.mongo_collection.find({"participants_count": 0})
     empty_rooms = list(empty_rooms)
     if not empty_rooms:
         return list()  # or None
@@ -96,3 +89,14 @@ def search_empty_rooms():
             hidden=room_document["hidden"],
             size_limit=room_document["size_limit"],
         )
+
+
+def return_all_rooms() -> Iterator[Room]:
+    yield from Room.mongo_collection.find()
+
+
+def delete_empty_rooms():
+    logger.debug("Searching for all empty rooms...")
+    "Delete rooms with no linked users"
+    for room in search_empty_rooms():
+        room.delete()

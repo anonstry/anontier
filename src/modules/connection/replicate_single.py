@@ -4,10 +4,11 @@ from hydrogram.errors import InputUserDeactivated, UserIsBlocked
 from hydrogram.types import Message
 from loguru import logger
 
-from src.session.message import DatabaseMessage, search_correspondent_replied_message
-from src.session.user import User as DatabaseUser
-from src.session.user import search_room_members
+from src.database.message import DatabaseMessage, return_correspondent_message
+from src.database.user import DatabaseUser, search_room_members
+from src.modules.connection import add_message_header
 from src.telegram.filters.room import filter_room_linked
+from src.database.restriction import check_user_block
 
 
 async def send_single_message(
@@ -19,17 +20,27 @@ async def send_single_message(
     from_database_user: DatabaseUser,
 ):
     try:
-        new_message = await message.copy(
-            room_member.telegram_account_id,
-            reply_to_message_id=reply_to_message_id,
-            protect_content=from_database_user.protected_transmition,
-        )
+        if not message.text:
+            new_message = await message.copy(
+                room_member.telegram_account_id,
+                caption=add_message_header(message, from_database_user),
+                reply_to_message_id=reply_to_message_id,
+            )
+        else:
+            new_message = await client.send_message(
+                room_member.telegram_account_id,
+                add_message_header(message, from_database_user),
+                protect_content=True,
+                reply_to_message_id=reply_to_message_id,
+            )
         database_new_message = DatabaseMessage(
-            from_telegram_chat_id=room_member.telegram_account_id,
-            from_room_token=room_member.room_token,
+            label="bridge",
+            where_telegram_chat_id=room_member.telegram_account_id,
+            where_room_token=room_member.room_token,
             telegram_message_id=new_message.id,
-            from_primary_room_token=from_database_user.room_token,
-            from_primary_message_token=database_message.token,
+            from_root_room_token=from_database_user.room_token,
+            from_root_message_token=database_message.identifier,
+            expiration_timestamp=database_message.expiration_timestamp,
         )
         database_new_message.create()
     except (UserIsBlocked, InputUserDeactivated):
@@ -48,10 +59,11 @@ async def send_single_message(
 async def broadcast(client: Client, message: Message):
     database_user = DatabaseUser(message.from_user.id)
     database_user.create()
-    database_user.refresh()
+    database_user.reload()
     database_message = DatabaseMessage(
-        from_telegram_chat_id=message.chat.id,
-        from_room_token=database_user.room_token,
+        label="bridge",
+        where_telegram_chat_id=message.chat.id,
+        where_room_token=database_user.room_token,
         telegram_message_id=message.id,
     )
     database_message.create()
@@ -64,26 +76,30 @@ async def broadcast(client: Client, message: Message):
         )
     )
     for room_member in room_members:
+        if check_user_block(
+            where_room_token=database_user.room_token,
+            telegram_account_id=message.from_user.id,
+            applied_by_telegram_account_id=room_member.telegram_account_id,
+        ):
+            return
         reply_to_message_id = None
         if message.reply_to_message_id:
             try:
                 database_reply_to_message = DatabaseMessage(
-                    from_telegram_chat_id=message.chat.id,
-                    from_room_token=database_user.room_token,
+                    where_telegram_chat_id=message.chat.id,
+                    where_room_token=database_user.room_token,
                     telegram_message_id=message.reply_to_message_id,
                 )
                 database_reply_to_message.refresh()
-                document_message = search_correspondent_replied_message(
+                document_message = return_correspondent_message(
                     where_telegram_chat_id=room_member.telegram_account_id,
                     where_room_token=room_member.room_token,
-                    with_primary_message_token=database_reply_to_message.from_primary_message_token
-                    or database_reply_to_message.token,
+                    linked_root_message_identifier=database_reply_to_message.from_root_message_token
+                    or database_reply_to_message.identifier,
                 )
-            except AssertionError:
-                exception = "Could not find which message(s) is being replied in the current room!"
-                logger.error(exception)
-            else:
                 reply_to_message_id = document_message["telegram_message_id"]
+            except (AssertionError, TypeError, KeyError):
+                logger.error("A replied message was not found!")
         await send_single_message(
             client,
             message,

@@ -18,9 +18,9 @@ git_repository_remote_link = (
     .config_reader.get("url")
     .replace("git@github.com:", "https://github.com/")
 )
-latest_git_repository_tag = sorted(
-    git_repository.tags, key=lambda tag: tag.commit.committed_datetime
-)[-1].name
+#latest_git_repository_tag = sorted(
+#    git_repository.tags, key=lambda tag: tag.commit.committed_datetime
+#)[-1].name
 latest_git_repository_commit_shorted = git_repository.git.rev_parse(
     git_repository.head.commit.hexsha, short=True
 )
