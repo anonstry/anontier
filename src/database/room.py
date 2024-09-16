@@ -10,7 +10,7 @@ class Room:
 
     def __init__(self, token=None, size_limit=2, hidden=False):
         self.token = token or create_token(24)
-        self.size_limit = min(min(2, size_limit), 100)
+        self.size_limit = min(max(2, size_limit), 100)
         self.hidden = hidden
         self.participants_count = 0
         self.title = None  # @experimental

@@ -82,11 +82,11 @@ def schedule_sanization(client):
             "trigger": "cron",
             "minute": 1,
         },
-        {
-            "func": partial(delete_messages_with_expired_lifetime, client),
-            "trigger": "cron",
-            "minute": 1,
-        },
+        # {
+        #     "func": partial(delete_messages_with_expired_lifetime, client),
+        #     "trigger": "cron",
+        #     "second": 1,
+        # },
         {
             "func": delete_empty_rooms,
             "trigger": "cron",

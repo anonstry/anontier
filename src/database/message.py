@@ -32,7 +32,7 @@ class DatabaseMessage:
         self.from_root_room_token = from_root_room_token
         self.from_root_message_token = from_root_message_token
         if not expiration_timestamp:
-            self.expiration_timestamp = int(pendulum.now().add(year=1).timestamp())
+            self.expiration_timestamp = int(pendulum.now().add(years=1).timestamp())
         else:
             self.expiration_timestamp = expiration_timestamp
         self.label = label
