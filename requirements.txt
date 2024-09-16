@@ -1,0 +1,10 @@
+pymongo
+hydrogram
+dynaconf
+loguru
+tgcrypto
+pendulum
+apscheduler
+GitPython
+mongoengine
+faker
