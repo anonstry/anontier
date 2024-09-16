@@ -9,7 +9,7 @@ client: Client = Client(
     api_id=settings.TELEGRAM_API_ID,
     api_hash=settings.TELEGRAM_API_HASH,
     bot_token=settings.TELEGRAM_BOT_TOKEN,
-    plugins=dict(root="src.modules", exclude=["experimental"]),
+    plugins=dict(root="app.modules", exclude=["experimental"]),
 )
 
 git_repository = Repo(search_parent_directories=True)

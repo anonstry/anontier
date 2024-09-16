@@ -1,4 +1,4 @@
-from src.database import mongo_database
+from app.database import mongo_database
 
 import pendulum
 from loguru import logger

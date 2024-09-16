@@ -23,9 +23,9 @@ from hydrogram.errors import (
 )
 from hydrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
 
-from src.database.message import DatabaseMessage
-from src.database.user import DatabaseUser
-from src.modules.connection import add_message_header
+from app.database.message import DatabaseMessage
+from app.database.user import DatabaseUser
+from app.modules.connection import add_message_header
 
 
 def remove_text_command(message):

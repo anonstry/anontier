@@ -4,9 +4,9 @@ from hydrogram import filters
 from hydrogram.client import Client
 from hydrogram.types import Message
 
-from src.database.user import DatabaseUser
-from src.database.room import Room
-from src import latest_git_repository_commit_shorted, git_repository_remote_link
+from app.database.user import DatabaseUser
+from app.database.room import Room
+from app import latest_git_repository_commit_shorted, git_repository_remote_link
 
 
 @Client.on_message(filters.private & filters.command("status"))

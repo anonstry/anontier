@@ -8,8 +8,8 @@ from hydrogram import filters
 from hydrogram.client import Client
 from hydrogram.types import Message
 
-from src.database.user import DatabaseUser, search_room_members
-from src.database.restriction import new_user_block
+from app.database.user import DatabaseUser, search_room_members
+from app.database.restriction import new_user_block
 
 import hashlib
 

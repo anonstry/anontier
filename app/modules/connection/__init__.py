@@ -6,10 +6,10 @@ from hydrogram.raw.types import UpdateBotStopped
 from hydrogram.types import Message, Update
 from loguru import logger
 
-from src.database.room import Room, search_public_room
-from src.database.user import DatabaseUser
-from src.sanitization import delete_empty_rooms
-from src.telegram.filters.room import filter_room_linked
+from app.database.room import Room, search_public_room
+from app.database.user import DatabaseUser
+from app.sanitization import delete_empty_rooms
+from app.telegram.filters.room import filter_room_linked
 
 
 @Client.on_raw_update()

@@ -3,7 +3,7 @@ from hydrogram.filters import Filter
 from hydrogram.client import Client
 from hydrogram.types import Message
 
-from src.database.user import DatabaseUser
+from app.database.user import DatabaseUser
 
 
 async def check_room_linked(_: Filter, __: Client, message: Message):
