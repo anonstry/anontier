@@ -3,7 +3,7 @@
 
 from hydrogram.client import Client
 
-from app.database.user import return_all_users, search_room_members
+from src.database.user import return_all_users, search_room_members
 
 async def notify_all_users(client: Client, caption: str):
     "Broadcast for all users"

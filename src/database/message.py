@@ -8,7 +8,7 @@ from typing import Iterator
 from loguru import logger
 import pendulum
 
-from app.database import create_token, mongo_database
+from src.database import create_token, mongo_database
 
 
 class DatabaseMessage:

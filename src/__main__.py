@@ -1,8 +1,8 @@
 from hydrogram import idle
 from loguru import logger
 
-from app import client, scheduler
-from app.sanitization import schedule_sanization
+from src import client, scheduler
+from src.sanitization import schedule_sanization
 
 
 async def routine(app):

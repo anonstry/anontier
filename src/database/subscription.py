@@ -1,5 +1,5 @@
-from app.database import mongo_database
-from app.database.user import DatabaseUser
+from src.database import mongo_database
+from src.database.user import DatabaseUser
 
 import pendulum
 from loguru import logger

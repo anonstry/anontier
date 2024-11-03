@@ -10,12 +10,12 @@ from hydrogram.errors import InputUserDeactivated, UserIsBlocked
 from hydrogram.types import Message
 from loguru import logger
 
-from app.database.message import DatabaseMessage, return_correspondent_message
-from app.database.user import DatabaseUser, search_room_members
-from app.database.restriction import check_user_block
-from app.modules.connection import add_message_header
-from app.telegram.filters.room import filter_room_linked
-from app.telegram.modded.copy_media_group import copy_media_group
+from src.database.message import DatabaseMessage, return_correspondent_message
+from src.database.user import DatabaseUser, search_room_members
+from src.database.restriction import check_user_block
+from src.modules.connection import add_message_header
+from src.telegram.filters.room import filter_room_linked
+from src.telegram.modded.copy_media_group import copy_media_group
 
 _tasks = set()
 T = TypeVar("T")

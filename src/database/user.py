@@ -1,7 +1,7 @@
 from typing import Iterator
 
-from app.database import create_token, create_username, mongo_database
-from app.database.room import Room
+from src.database import create_token, create_username, mongo_database
+from src.database.room import Room
 
 
 class DatabaseUser:

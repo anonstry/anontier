@@ -4,7 +4,7 @@ from hydrogram import filters
 from hydrogram.client import Client
 from hydrogram.types import Message
 
-from app.database.user import DatabaseUser
+from src.database.user import DatabaseUser
 
 
 @Client.on_message(filters.command("tagme"))

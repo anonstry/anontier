@@ -2,7 +2,7 @@ from typing import Iterator
 
 from loguru import logger
 
-from app.database import mongo_database, create_token
+from src.database import mongo_database, create_token
 
 
 class Room:

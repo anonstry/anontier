@@ -9,12 +9,11 @@ from hydrogram.enums import ChatAction
 from hydrogram.errors import InputUserDeactivated, UserIsBlocked
 from loguru import logger
 
-from app import scheduler
-from app.database.room import delete_empty_rooms, return_all_rooms, Room
-from app.database.user import return_all_users, search_room_members
-from app.database.message import return_all_expired_messages
-from app.database.subscription import deactivate_expired_premium_subscriptions
-from app.database.restriction import delete_expired_user_blocks
+from src import scheduler
+from src.database.room import delete_empty_rooms, return_all_rooms, Room
+from src.database.user import return_all_users, search_room_members
+from src.database.subscription import deactivate_expired_premium_subscriptions
+from src.database.restriction import delete_expired_user_blocks
 
 
 async def remove_blocked_users(client: Client):

@@ -5,8 +5,8 @@ from hydrogram.client import Client
 from hydrogram.enums import ChatAction
 from hydrogram.types import Message
 
-from app.database.user import DatabaseUser
-from app.telegram.filters.room import filter_room_linked
+from src.database.user import DatabaseUser
+from src.telegram.filters.room import filter_room_linked
 
 
 @Client.on_message(filters.private & filters.command("start") & ~filter_room_linked)

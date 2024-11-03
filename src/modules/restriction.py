@@ -5,9 +5,9 @@ from hydrogram import filters
 from hydrogram.client import Client
 from hydrogram.types import Message
 
-from app.database.user import DatabaseUser
-from app.database.message import DatabaseMessage, return_root_message
-from app.database.restriction import new_user_block, delete_user_block
+from src.database.user import DatabaseUser
+from src.database.message import DatabaseMessage, return_root_message
+from src.database.restriction import new_user_block, delete_user_block
 
 
 @Client.on_message(

@@ -5,14 +5,14 @@ from hydrogram.client import Client
 from hydrogram.errors import MessageIdInvalid, MessageNotModified
 from hydrogram.types import Message
 
-from app.database.message import (
+from src.database.message import (
     DatabaseMessage,
     search_for_original_messages_with_id,
     search_linked_messages,
 )
-from app.database.user import DatabaseUser
-from app.modules.connection import add_message_header
-from app.telegram.tools.media import mount_input_media
+from src.database.user import DatabaseUser
+from src.modules.connection import add_message_header
+from src.telegram.tools.media import mount_input_media
 
 from loguru import logger
 
