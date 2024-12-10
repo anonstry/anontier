@@ -22,8 +22,10 @@ from src.database import (
 )
 
 # from src.modules.connection import add_message_header
+from src.modules.antiflood import SpamChecker
 from src.telegram.filters.room import linked_room__filter
 from src.telegram.modded.copy_media_group import copy_media_group
+from src import client as hydrogramClient
 
 
 _tasks = set()
@@ -48,8 +50,8 @@ class Album:
 _albums: defaultdict[int, dict[str, Album]] = defaultdict(dict)
 
 
-@Client.on_message(
-    filters.private
+@Client.on_message(self=hydrogramClient,
+filters=filters.private
     & linked_room__filter
     & ~filters.regex("^/")
     # & ~filters.command
@@ -84,6 +86,10 @@ async def on_media_group(client: Client, message: Message):
 
 
 async def on_album(client: Client, album: Album):
+    if client.me is None:
+        print("on_album: client.me is None")
+        return
+
     first_album_message = album.messages[0]
     # last_album_message = album.messages[-1]
     family_ids = list()
@@ -129,14 +135,15 @@ async def on_album(client: Client, album: Album):
                         telegram_message_id=first_album_message.reply_to_message_id,
                     )
                 )
-                derivated_message_document = await search_linked_message(
-                    where_telegram_chat_id=room_member.telegram_account_id,
-                    where_room_token=room_token,
-                    family_id=replied_message_document.family_id,
-                    document_message_id=replied_message_document.id,
-                )
-                assert derivated_message_document
-                reply_to_message_id = derivated_message_document.telegram_message_id
+                if replied_message_document:
+                    derivated_message_document = await search_linked_message(
+                        where_telegram_chat_id=room_member.telegram_account_id,
+                        where_room_token=room_token,
+                        family_id=replied_message_document.family_id,
+                        document_message_id=replied_message_document.id,
+                    )
+                    if derivated_message_document:
+                        reply_to_message_id = derivated_message_document.telegram_message_id
             except AssertionError:
                 # logger.error(exception)
                 logger.error("A replied message was not found!")
@@ -159,12 +166,25 @@ async def send_grouped_messages(
     family_ids: list[int],
     reply_to_message_id: Optional[int] = None,
 ):
+    if client.me is None:
+        print("send_grouped_messages: client.me is None")
+        return
+
     # Aqui precisamos melhorar
     # Provavelmente será necessário uma
     # forma de registrar todos os albums
     # e tambem todos as mensagens single como um album,
     # para quando for editar uma mensagem: sempre edite a primeira.
     first_album_message = messages[0]
+
+    spam_checker = SpamChecker()
+    if spam_checker.add_message(first_album_message.from_user.id):
+        await client.send_message(
+            first_album_message.from_user.id,
+            text="Your message wasn't sent, it was flagged as spam",
+            reply_to_message_id=first_album_message.id
+        )
+        return
     try:
         shadow_messages = await copy_media_group(
             client,

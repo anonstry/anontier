@@ -298,9 +298,7 @@ async def search_linked_message(
 
 
 async def search_all_linked_messages(family_id):
-    documents = await DocumentMessage.find(
-        {DocumentMessage.family_id: family_id}
-    ).to_list()
+    documents = await DocumentMessage.find(DocumentMessage.family_id == family_id).to_list()
     try:
         return documents
     except IndexError:

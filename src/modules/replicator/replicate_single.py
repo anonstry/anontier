@@ -19,7 +19,9 @@ from src.database import (
 
 # from src.database.restriction import check_user_block
 # from src.modules.connection import add_message_header
+from src.modules.antiflood import SpamChecker
 from src.telegram.filters.room import linked_room__filter
+from src import client as hydrogramClient
 
 
 async def send_single_message(
@@ -30,6 +32,10 @@ async def send_single_message(
     family_id: int,
     reply_to_message_id: Optional[int] = None,
 ):
+    if client.me is None:
+        print("send_single_message: client.me is None")
+        return
+
     try:
         if not message.text:
             shadow_message = await message.copy(
@@ -48,26 +54,41 @@ async def send_single_message(
                 # protect_content=True,
                 reply_to_message_id=reply_to_message_id,
             )
-        await create_document_message(
-            where_telegram_client_id=client.me.id,
-            where_telegram_chat_id=where_telegram_chat_id,
-            where_room_token=where_room_token,
-            telegram_message_id=shadow_message.id,
-            label="connection-shadow-message",
-            family_id=family_id,
-        )
+        if shadow_message is not None and isinstance(shadow_message, Message):
+            await create_document_message(
+                where_telegram_client_id=client.me.id,
+                where_telegram_chat_id=where_telegram_chat_id,
+                where_room_token=where_room_token,
+                telegram_message_id=shadow_message.id,
+                label="connection-shadow-message",
+                family_id=family_id,
+            )
+
     except (UserIsBlocked, InputUserDeactivated):
         await unlink_document_user_room_token(where_telegram_chat_id)
         await deactivate_document_user(where_telegram_chat_id)
 
 
-@Client.on_message(
-    filters.private
+@Client.on_message(self=hydrogramClient,
+filters=filters.private
     & linked_room__filter
     & ~filters.regex("^/")
     & ~filters.media_group
 )
 async def single_message_receptor(client: Client, message: Message):
+    if client.me is None:
+        print("single_message_receptor: client.me is None")
+        return
+
+    spam_checker = SpamChecker()
+    if spam_checker.add_message(message.from_user.id):
+        await client.send_message(
+            message.from_user.id,
+            text="Your message wasn't sent, it was flagged as spam",
+            reply_to_message_id=message.id
+        )
+        return
+
     family_id = int(
         str(message.from_user.id + message.id + choice(range(1000)))
     )  # Calculating the family ID
@@ -105,14 +126,15 @@ async def single_message_receptor(client: Client, message: Message):
                         telegram_message_id=message.reply_to_message_id,
                     )
                 )
-                derivated_message_document = await search_linked_message(
-                    where_telegram_chat_id=room_member.telegram_account_id,
-                    where_room_token=room_token,
-                    family_id=replied_message_document.family_id,
-                    document_message_id=replied_message_document.id,
-                )
-                assert derivated_message_document
-                reply_to_message_id = derivated_message_document.telegram_message_id
+                if replied_message_document:
+                    derivated_message_document = await search_linked_message(
+                        where_telegram_chat_id=room_member.telegram_account_id,
+                        where_room_token=room_token,
+                        family_id=replied_message_document.family_id,
+                        document_message_id=replied_message_document.id,
+                    )
+                    if derivated_message_document is not None:
+                        reply_to_message_id = derivated_message_document.telegram_message_id
             except AssertionError:
                 # logger.error(exception)
                 logger.error("A replied message was not found!")

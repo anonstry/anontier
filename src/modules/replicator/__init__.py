@@ -18,9 +18,10 @@ from src.database import (
     update_document_user_room_token,
 )
 from src.telegram.filters.room import linked_room__filter
+from src import client as hydrogramClient
 
 
-@Client.on_message(filters.private & filters.command("unmatch") & ~linked_room__filter)
+@Client.on_message(self=hydrogramClient, filters=filters.private & filters.command("unmatch") & ~linked_room__filter)
 async def suggest_match(client: Client, message: Message):
     caption = "You are not into a room yet. Try /match"
     await message.reply(text=caption, quote=True)
@@ -28,7 +29,8 @@ async def suggest_match(client: Client, message: Message):
 
 
 @Client.on_message(
-    filters.private
+    self=hydrogramClient,
+    filters=filters.private
     & (filters.command("join") | filters.command("party") | filters.command("match"))
     & linked_room__filter
 )
@@ -38,7 +40,7 @@ async def suggest_unmatch(client: Client, message: Message):
     message.stop_propagation()
 
 
-@Client.on_message(filters.private & filters.command("unmatch") & linked_room__filter)
+@Client.on_message(self=hydrogramClient, filters=filters.private & filters.command("unmatch") & linked_room__filter)
 async def quit_room(client: Client, message: Message):
     room_token = await get_document_user_linked_room_token(message.from_user.id)
     await unlink_document_user_room_token(message.from_user.id)
@@ -52,11 +54,15 @@ async def quit_room(client: Client, message: Message):
     message.stop_propagation()
 
 
-@Client.on_message(filters.private & filters.command("match") & ~linked_room__filter)
+@Client.on_message(self=hydrogramClient, filters=filters.private & filters.command("match") & ~linked_room__filter)
 async def match_room(client: Client, message: Message):
     await create_document_user(telegram_account_id=message.from_user.id)
     try:
-        sorting_number = int(message.command[1])
+        command = message.command
+        if command:
+            sorting_number = int(command[1])
+        else:
+            raise Exception("Command not found")
     except (IndexError, ValueError, Exception):  # Not exists or not integer
         sorting_number = 1
     public_telegram_room_token = await search_public_room_token(sorting_number)
@@ -88,10 +94,14 @@ async def match_room(client: Client, message: Message):
     message.stop_propagation()
 
 
-@Client.on_message(filters.private & filters.command("nroom") & ~linked_room__filter)
+@Client.on_message(self=hydrogramClient, filters=filters.private & filters.command("nroom") & ~linked_room__filter)
 async def create_new_room(client: Client, message: Message):
     try:
-        room_size_limit = message.command[1]
+        command = message.command
+        if command:
+            room_size_limit = command[1]
+        else:
+            raise Exception("Command not found")
     except IndexError:
         caption = "You must write the room size limit!"
         await message.reply(text=caption, quote=True, protect_content=True)
@@ -129,11 +139,15 @@ async def create_new_room(client: Client, message: Message):
     message.stop_propagation()
 
 
-@Client.on_message(filters.private & filters.command("join") & ~linked_room__filter)
+@Client.on_message(self=hydrogramClient, filters=filters.private & filters.command("join") & ~linked_room__filter)
 async def join_room(client: Client, message: Message):
     room_token = None
     try:
-        room_token = message.command[1]
+        command = message.command
+        if command:
+            room_token = command[1]
+        else:
+            raise Exception("Command not found")
     except IndexError:
         logger.error("A user provided an empty token!")
         caption = "You must provide a room token! Try /manual"
