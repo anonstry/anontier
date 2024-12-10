@@ -6,10 +6,10 @@ from hydrogram.raw.types import UpdateBotStopped
 from hydrogram.types import Message, Update
 from loguru import logger
 
-from src.database.room import Room, search_public_room
+from src.database.room import Room, search_public_room, delete_empty_rooms
 from src.database.user import DatabaseUser
-from src.sanitization import delete_empty_rooms
-from src.telegram.filters.room import filter_room_linked
+# from src.sanitization import delete_empty_rooms
+from src.telegram.filters.room import linked_room__filter
 
 
 @Client.on_raw_update()
@@ -25,7 +25,7 @@ async def bot_stopped(client: Client, update: Update, _, __):
         # await notify_room_members(client, caption, room_token)
 
 
-@Client.on_message(filters.private & filters.command("unmatch") & ~filter_room_linked)
+@Client.on_message(filters.private & filters.command("unmatch") & ~linked_room__filter)
 async def suggest_match(client: Client, message: Message):
     caption = "You are not into a room yet. Try /match"
     await message.reply(text=caption, quote=True)
@@ -35,7 +35,7 @@ async def suggest_match(client: Client, message: Message):
 @Client.on_message(
     filters.private
     & (filters.command("join") | filters.command("party") | filters.command("match"))
-    & filter_room_linked
+    & linked_room__filter
 )
 async def suggest_unmatch(client: Client, message: Message):
     caption = "You already in a conversation/room. Try /unmatch"
@@ -43,7 +43,7 @@ async def suggest_unmatch(client: Client, message: Message):
     message.stop_propagation()
 
 
-@Client.on_message(filters.private & filters.command("unmatch") & filter_room_linked)
+@Client.on_message(filters.private & filters.command("unmatch") & linked_room__filter)
 async def quit_room(client: Client, message: Message):
     database_user = DatabaseUser(message.from_user.id)
     database_user.reload()
@@ -59,7 +59,7 @@ async def quit_room(client: Client, message: Message):
     message.stop_propagation()
 
 
-@Client.on_message(filters.private & filters.command("match") & ~filter_room_linked)
+@Client.on_message(filters.private & filters.command("match") & ~linked_room__filter)
 async def match_room(client: Client, message: Message):
     database_user = DatabaseUser(message.from_user.id)
     database_user.reload()
@@ -95,7 +95,7 @@ async def match_room(client: Client, message: Message):
     message.stop_propagation()
 
 
-@Client.on_message(filters.private & filters.command("party") & ~filter_room_linked)
+@Client.on_message(filters.private & filters.command("party") & ~linked_room__filter)
 async def create_party(client: Client, message: Message):
     database_user = DatabaseUser(message.from_user.id)
     database_user.reload()
@@ -139,7 +139,7 @@ async def create_party(client: Client, message: Message):
     message.stop_propagation()
 
 
-@Client.on_message(filters.private & filters.command("join") & ~filter_room_linked)
+@Client.on_message(filters.private & filters.command("join") & ~linked_room__filter)
 async def join_room(client: Client, message: Message):
     database_user = DatabaseUser(message.from_user.id)
     database_user.reload()

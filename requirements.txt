@@ -8,3 +8,15 @@ apscheduler
 GitPython
 mongoengine
 faker
+
+hydrogram
+tgcrypto
+dynaconf
+loguru
+beanie
+motor
+aiocron
+pendulum
+pyrogram
+
+shortuuid

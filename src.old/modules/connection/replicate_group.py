@@ -14,7 +14,7 @@ from src.database.message import DatabaseMessage, return_correspondent_message
 from src.database.user import DatabaseUser, search_room_members
 from src.database.restriction import check_user_block
 from src.modules.connection import add_message_header
-from src.telegram.filters.room import filter_room_linked
+from src.telegram.filters.room import linked_room__filter
 from src.telegram.modded.copy_media_group import copy_media_group
 
 _tasks = set()
@@ -41,7 +41,7 @@ _albums: defaultdict[int, dict[str, Album]] = defaultdict(dict)
 
 @Client.on_message(
     filters.private
-    & filter_room_linked
+    & linked_room__filter
     & ~filters.regex("^/")
     # & ~filters.command
     & filters.media_group

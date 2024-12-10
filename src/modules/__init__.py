@@ -2,31 +2,35 @@ from pathlib import Path
 
 from hydrogram import filters
 from hydrogram.client import Client
-from hydrogram.enums import ChatAction
-from hydrogram.types import Message
+from hydrogram.raw.types import UpdateBotStopped
+from hydrogram.types import Message, Update
 
-from src.database.user import DatabaseUser
-from src.telegram.filters.room import filter_room_linked
+from src.database import (
+    deactivate_document_user,
+    unlink_document_user_room_token,
+    create_document_user,
+)
+from src.telegram.filters.room import linked_room__filter
 
 
-@Client.on_message(filters.private & filters.command("start") & ~filter_room_linked)
+@Client.on_message(filters.private, group=-1)
+async def register(client: Client, message: Message):
+    await create_document_user(message.from_user.id)
+
+
+# def advice to use a command
+# def dynamic rotative username
+
+@Client.on_message(filters.private & filters.command("start") & ~linked_room__filter)
 async def initialize(client: Client, message: Message):
-    database_user = DatabaseUser(message.from_user.id)
-    database_user.create()
-    database_user.reload()
-    caption = Path("assets/texts/initialization.txt").read_text()
-    filepath = Path("assets/images/initialization.jpg")
-    await message.reply_photo(str(filepath), quote=True, caption=caption)
+    caption_text = Path("assets/texts/initialization.txt").read_text()
+    photo_filepath = Path("assets/images/initialization.jpg")
+    await message.reply_photo(photo_filepath, caption=caption_text, quote=True)
     message.stop_propagation()
 
 
-@Client.on_message(filters.private & ~filters.regex("^/") & ~filter_room_linked)
-async def suggest_match(client: Client, message: Message):
-    caption = "You are not into a conversation yet. Try /match"
-    await message.reply(caption, quote=True)
-    message.stop_propagation
-
-
-@Client.on_message(filters.group)
-async def send_typing_signal(client: Client, message: Message):
-    await client.send_chat_action(message.chat.id, ChatAction.TYPING)
+@Client.on_raw_update()
+async def bot_stopped(client: Client, update: Update, _, __):
+    if isinstance(update, UpdateBotStopped) and update.stopped:
+        await unlink_document_user_room_token(update.user_id)
+        await deactivate_document_user(update.user_id)

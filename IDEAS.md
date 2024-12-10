@@ -1,4 +1,5 @@
 * **Basic**
+    - [ ] Premium expiration timestamp
     - [x] Mailing
     - [ ] Mailing with an invite
     - [ ] Scan all non-registered messages and register them in order
@@ -32,3 +33,5 @@
     - [ ] ~~Notify the user if the message.delete fail~~
     - [ ] ~~If a user blocks the bot, notify the remaining peers/users~~
     - [ ] ~~If a user leave the room, notify the remaining peers/users~~
+
+

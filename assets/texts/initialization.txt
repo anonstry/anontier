@@ -1,6 +1,3 @@
 **Hello!**
 Try /manual for instructions,
-or a simple /match to chat with people.
-
-**[backup@page]**
-https://t.me/+OOsl8JYs7Hg5YWZh
+or a simple /match to join in a random room.

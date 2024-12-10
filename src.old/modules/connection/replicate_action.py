@@ -10,7 +10,7 @@ from src.database.message import (
     search_for_original_messages_with_id,
     search_linked_messages,
 )
-from src.database.user import DatabaseUser
+from src.database.user import DocumentU
 from src.modules.connection import add_message_header
 from src.telegram.tools.media import mount_input_media
 
@@ -19,9 +19,15 @@ from loguru import logger
 
 @Client.on_edited_message(filters.private & filters.text)
 async def edit_linked_message_text(client: Client, message: Message):
+    
+    
+    document_user = DocumentUser()
     database_user = DatabaseUser(message.from_user.id)
     database_user.create()
     database_user.reload()
+    
+    document_user = 
+    
     database_message = DatabaseMessage(
         where_telegram_chat_id=message.chat.id,
         where_room_token=database_user.room_token,

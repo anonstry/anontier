@@ -57,7 +57,7 @@ class Room:
 
 def search_public_room(sorting_number):
     sorting_number = -1 if sorting_number < 0 else 1
-    room_document = Room.mongo_collection.find_one(
+    telegram_room_document = Room.mongo_collection.find_one(
         filter={
             "hidden": False,
             "$and": [
@@ -67,14 +67,14 @@ def search_public_room(sorting_number):
         },
         sort=[("participants_count", sorting_number)],
     )
-    if not room_document:
+    if not telegram_room_document:
         return
     else:
-        return Room(
-            token=room_document["token"],
-            hidden=room_document["hidden"],
+        return await TelegramRoom(
+            token=telegram_room_document.token,
+            hidden=telegram_room_document.hidden,
             size_limit=room_document["size_limit"],
-        )
+        ).
 
 
 def search_empty_rooms():
