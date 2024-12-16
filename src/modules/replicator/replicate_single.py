@@ -19,7 +19,7 @@ from src.database import (
 
 # from src.database.restriction import check_user_block
 # from src.modules.connection import add_message_header
-from src.modules.antiflood import SpamChecker
+from src.modules.protector.mitigate_flood import SpamChecker
 from src.telegram.filters.room import linked_room__filter
 
 
@@ -69,10 +69,7 @@ async def send_single_message(
 
 
 @Client.on_message(
-    filters=filters.private
-    & linked_room__filter
-    & ~filters.regex("^/")
-    & ~filters.media_group
+    filters.private & linked_room__filter & ~filters.regex("^/") & ~filters.media_group
 )
 async def single_message_receptor(client: Client, message: Message):
     if client.me is None:

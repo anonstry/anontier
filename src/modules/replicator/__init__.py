@@ -20,9 +20,7 @@ from src.database import (
 from src.telegram.filters.room import linked_room__filter
 
 
-@Client.on_message(
-    filters=filters.private & filters.command("unmatch") & ~linked_room__filter
-)
+@Client.on_message(filters.private & filters.command("unmatch") & ~linked_room__filter)
 async def suggest_match(client: Client, message: Message):
     caption = "You are not into a room yet. Try /match"
     await message.reply(text=caption, quote=True)
@@ -30,7 +28,7 @@ async def suggest_match(client: Client, message: Message):
 
 
 @Client.on_message(
-    filters=filters.private
+    filters.private
     & (filters.command("join") | filters.command("nroom") | filters.command("match"))
     & linked_room__filter,
 )
@@ -40,9 +38,7 @@ async def suggest_unmatch(client: Client, message: Message):
     message.stop_propagation()
 
 
-@Client.on_message(
-    filters=filters.private & filters.command("unmatch") & linked_room__filter
-)
+@Client.on_message(filters.private & filters.command("unmatch") & linked_room__filter)
 async def quit_room(client: Client, message: Message):
     room_token = await get_document_user_linked_room_token(message.from_user.id)
     await unlink_document_user_room_token(message.from_user.id)
@@ -56,9 +52,7 @@ async def quit_room(client: Client, message: Message):
     message.stop_propagation()
 
 
-@Client.on_message(
-    filters=filters.private & filters.command("match") & ~linked_room__filter
-)
+@Client.on_message(filters.private & filters.command("match") & ~linked_room__filter)
 async def match_room(client: Client, message: Message):
     await create_document_user(telegram_account_id=message.from_user.id)
     try:
@@ -98,9 +92,7 @@ async def match_room(client: Client, message: Message):
     message.stop_propagation()
 
 
-@Client.on_message(
-    filters=filters.private & filters.command("nroom") & ~linked_room__filter
-)
+@Client.on_message(filters.private & filters.command("nroom") & ~linked_room__filter)
 async def create_new_room(client: Client, message: Message):
     try:
         command = message.command
@@ -145,9 +137,7 @@ async def create_new_room(client: Client, message: Message):
     message.stop_propagation()
 
 
-@Client.on_message(
-    filters=filters.private & filters.command("join") & ~linked_room__filter
-)
+@Client.on_message(filters.private & filters.command("join") & ~linked_room__filter)
 async def join_room(client: Client, message: Message):
     room_token = None
     try:

@@ -22,7 +22,7 @@ from src.database import (
 )
 
 # from src.modules.connection import add_message_header
-from src.modules.antiflood import SpamChecker
+from src.modules.protector.mitigate_flood import SpamChecker
 from src.telegram.filters.room import linked_room__filter
 from src.telegram.modded.copy_media_group import copy_media_group
 
@@ -50,7 +50,7 @@ _albums: defaultdict[int, dict[str, Album]] = defaultdict(dict)
 
 
 @Client.on_message(
-    filters=filters.private
+    filters.private
     & linked_room__filter
     & ~filters.regex("^/")
     # & ~filters.command

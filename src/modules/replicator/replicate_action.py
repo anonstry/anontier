@@ -20,7 +20,7 @@ from src.telegram.filters.room import linked_room__filter
 # from loguru import logger
 
 
-@Client.on_edited_message(filters=filters.private & filters.text & linked_room__filter)
+@Client.on_edited_message(filters.private & filters.text & linked_room__filter)
 async def edit_linked_message_text(client: Client, message: Message):
     if client.me is None:
         print("edit_linked_message_text: client.me is None")
@@ -66,7 +66,7 @@ async def edit_linked_message_text(client: Client, message: Message):
             print("edit_linked_message_text: linked_message are multiple messages")
 
 
-@Client.on_edited_message(filters=filters.private & filters.media)
+@Client.on_edited_message(filters.private & filters.media)
 async def edit_linked_message_media(client: Client, message: Message):
     source_document = await get_document_message_from_generic_specifications(
         where_telegram_client_id=client.me.id,

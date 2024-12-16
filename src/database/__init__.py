@@ -6,6 +6,8 @@ from beanie import Document, init_beanie
 from dynaconf import settings
 from motor.motor_asyncio import AsyncIOMotorClient
 
+from loguru import logger
+
 # from typing import Annotated, Optional
 # from beanie import Document, Indexed, init_beanie
 
@@ -33,6 +35,9 @@ class DocumentMessage(Document):
     family_id: Optional[int] = None
     label: Optional[str] = None  # message-father or message-child
     media_group_id: Optional[int] = None
+    reported: bool = False
+    has_protected_content: bool = False
+    has_media_spoiler: bool = False
     # signature: Optional[str] = create_random_string(64)
     # expiration_timestamp = int(pendulum.now().add(years=1).timestamp())
 
@@ -53,6 +58,16 @@ class DocumentUser(Document):
 
     class Settings:
         name = "users"
+
+
+class DocumentNotification:
+    class Settings:
+        name = "notifications"
+
+class DocumentRestriction:
+    class Settings:
+        name = "restriction"
+
 
 
 # class Settings
@@ -76,6 +91,7 @@ async def init_database():
         database=getattr(mongo_client, settings.MONGO_DATABASE_NAME),
         document_models=[DocumentMessage, DocumentUser, DocumentRoom],
     )
+    logger.info("Database was initiated")
 
 
 async def get_document_user_visibility(telegram_account_id):
