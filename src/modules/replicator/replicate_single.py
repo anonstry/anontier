@@ -21,7 +21,6 @@ from src.database import (
 # from src.modules.connection import add_message_header
 from src.modules.antiflood import SpamChecker
 from src.telegram.filters.room import linked_room__filter
-from src import client as hydrogramClient
 
 
 async def send_single_message(
@@ -69,8 +68,8 @@ async def send_single_message(
         await deactivate_document_user(where_telegram_chat_id)
 
 
-@Client.on_message(self=hydrogramClient,
-filters=filters.private
+@Client.on_message(
+    filters=filters.private
     & linked_room__filter
     & ~filters.regex("^/")
     & ~filters.media_group
@@ -85,7 +84,7 @@ async def single_message_receptor(client: Client, message: Message):
         await client.send_message(
             message.from_user.id,
             text="Your message wasn't sent, it was flagged as spam",
-            reply_to_message_id=message.id
+            reply_to_message_id=message.id,
         )
         return
 
@@ -134,7 +133,9 @@ async def single_message_receptor(client: Client, message: Message):
                         document_message_id=replied_message_document.id,
                     )
                     if derivated_message_document is not None:
-                        reply_to_message_id = derivated_message_document.telegram_message_id
+                        reply_to_message_id = (
+                            derivated_message_document.telegram_message_id
+                        )
             except AssertionError:
                 # logger.error(exception)
                 logger.error("A replied message was not found!")

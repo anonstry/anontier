@@ -11,10 +11,9 @@ from src.database import (
     create_document_user,
 )
 from src.telegram.filters.room import linked_room__filter
-from src import client as hydrogramClient
 
 
-@Client.on_message(self=hydrogramClient, filters=filters.private, group=-1)
+@Client.on_message(filters=filters.private, group=-1)
 async def register(_, message: Message):
     await create_document_user(message.from_user.id)
 
@@ -22,7 +21,7 @@ async def register(_, message: Message):
 # def advice to use a command
 # def dynamic rotative username
 
-@Client.on_message(self=hydrogramClient, filters=filters.private & filters.command("start") & ~linked_room__filter)
+@Client.on_message(filters=filters.private & filters.command("start") & ~linked_room__filter)
 async def initialize(_, message: Message):
     caption_text = Path("assets/texts/initialization.txt").read_text()
     photo_filepath = Path("assets/images/initialization.jpg")
@@ -31,7 +30,7 @@ async def initialize(_, message: Message):
     message.stop_propagation()
 
 
-@Client.on_raw_update(self=hydrogramClient)
+@Client.on_raw_update()
 async def bot_stopped(_: Client, update: Update, __, ___):
     if isinstance(update, UpdateBotStopped) and update.stopped:
         await unlink_document_user_room_token(update.user_id)

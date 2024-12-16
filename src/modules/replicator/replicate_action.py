@@ -3,6 +3,7 @@ from contextlib import suppress
 from hydrogram import filters
 from hydrogram.client import Client
 from hydrogram.errors import MessageNotModified
+
 # from hydrogram.errors import MessageIdInvalid, MessageNotModified
 from hydrogram.types import InlineKeyboardMarkup, Message
 
@@ -14,18 +15,17 @@ from src.database import (
 from src._parser import add_message_header
 from src.telegram.tools.media import mount_input_media
 from src.telegram.filters.room import linked_room__filter
-from src import client as hydrogramClient
 
 
 # from loguru import logger
 
 
-@Client.on_edited_message(self=hydrogramClient, filters=filters.private & filters.text & linked_room__filter)
+@Client.on_edited_message(filters=filters.private & filters.text & linked_room__filter)
 async def edit_linked_message_text(client: Client, message: Message):
     if client.me is None:
         print("edit_linked_message_text: client.me is None")
         return
-    
+
     source_document = await get_document_message_from_generic_specifications(
         where_telegram_client_id=client.me.id,
         where_telegram_chat_id=message.chat.id,
@@ -61,14 +61,12 @@ async def edit_linked_message_text(client: Client, message: Message):
                     reply_markup=linked_message.reply_markup,
                 )
             else:
-                await linked_message.edit(
-                    await add_message_header(message)
-                )
+                await linked_message.edit(await add_message_header(message))
         else:
             print("edit_linked_message_text: linked_message are multiple messages")
 
 
-@Client.on_edited_message(self=hydrogramClient, filters=filters.private & filters.media)
+@Client.on_edited_message(filters=filters.private & filters.media)
 async def edit_linked_message_media(client: Client, message: Message):
     source_document = await get_document_message_from_generic_specifications(
         where_telegram_client_id=client.me.id,

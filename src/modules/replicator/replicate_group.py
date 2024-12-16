@@ -25,7 +25,6 @@ from src.database import (
 from src.modules.antiflood import SpamChecker
 from src.telegram.filters.room import linked_room__filter
 from src.telegram.modded.copy_media_group import copy_media_group
-from src import client as hydrogramClient
 
 
 _tasks = set()
@@ -50,8 +49,8 @@ class Album:
 _albums: defaultdict[int, dict[str, Album]] = defaultdict(dict)
 
 
-@Client.on_message(self=hydrogramClient,
-filters=filters.private
+@Client.on_message(
+    filters=filters.private
     & linked_room__filter
     & ~filters.regex("^/")
     # & ~filters.command
@@ -143,7 +142,9 @@ async def on_album(client: Client, album: Album):
                         document_message_id=replied_message_document.id,
                     )
                     if derivated_message_document:
-                        reply_to_message_id = derivated_message_document.telegram_message_id
+                        reply_to_message_id = (
+                            derivated_message_document.telegram_message_id
+                        )
             except AssertionError:
                 # logger.error(exception)
                 logger.error("A replied message was not found!")
@@ -182,7 +183,7 @@ async def send_grouped_messages(
         await client.send_message(
             first_album_message.from_user.id,
             text="Your message wasn't sent, it was flagged as spam",
-            reply_to_message_id=first_album_message.id
+            reply_to_message_id=first_album_message.id,
         )
         return
     try:
