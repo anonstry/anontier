@@ -1,3 +1,5 @@
+# Arquivo fantasma com funções antigas
+
 # def search_room_members(room_token):
 #     mongo_collection = DatabaseUser.mongo_collection
 #     room_members = mongo_collection.find({"room_token": room_token})
@@ -183,3 +185,97 @@
 
 
 # # def find_root_message
+
+
+# def new_anual_premium_subscription(telegram_account_id):
+#     expiration_timestamp = pendulum.now().add(years=1).timestamp()
+#     DatabaseSubscription.mongo_collection.update_one(
+#         filter={"telegram_account_id": telegram_account_id},
+#         update={
+#             "$set": {
+#                 "label": "premium",
+#                 "until_timestamp": expiration_timestamp,
+#             }
+#         },
+#         upsert=True,
+#     )
+#     database_user = DatabaseUser(telegram_account_id)
+#     database_user.reload()
+#     database_user.set_premium_true()
+
+
+# def search_expired_premium_subscriptions():
+#     logger.info("Searching for expired premium subscriptions...")
+#     documents = DatabaseSubscription.mongo_collection.find({"label": "premium"})
+#     now_timestamp = pendulum.now().timestamp()
+#     for document in documents:
+#         if document["until_timestamp"] < now_timestamp:
+#             yield document
+#     else:
+#         yield from list()  # Return empty list
+
+
+# def deactivate_expired_premium_subscriptions():
+#     for subscription in search_expired_premium_subscriptions():
+#         database_user = DatabaseUser(subscription["telegram_account_id"])
+#         database_user.reload()
+#         database_user.set_premium_false()
+
+# def search_empty_rooms():
+#     empty_rooms = Room.mongo_collection.find({"participants_count": 0})
+#     empty_rooms = list(empty_rooms)
+#     if not empty_rooms:
+#         return list()  # or None
+#     for empty_room in empty_rooms:
+#         room_document = empty_room
+#         yield Room(
+#             token=room_document["token"],
+#             hidden=room_document["hidden"],
+#             size_limit=room_document["size_limit"],
+#         )
+
+
+# def return_all_rooms() -> Iterator[Room]:
+#     yield from Room.mongo_collection.find()
+
+
+# def delete_empty_rooms():
+#     logger.debug("Searching for all empty rooms...")
+#     "Delete rooms with no linked users"
+#     for room in search_empty_rooms():
+#         room.delete()
+
+
+# def new_anual_premium_subscription(telegram_account_id):
+#     expiration_timestamp = pendulum.now().add(years=1).timestamp()
+#     DatabaseSubscription.mongo_collection.update_one(
+#         filter={"telegram_account_id": telegram_account_id},
+#         update={
+#             "$set": {
+#                 "label": "premium",
+#                 "until_timestamp": expiration_timestamp,
+#             }
+#         },
+#         upsert=True,
+#     )
+#     database_user = DatabaseUser(telegram_account_id)
+#     database_user.reload()
+#     database_user.set_premium_true()
+
+
+# def search_expired_premium_subscriptions():
+#     logger.info("Searching for expired premium subscriptions...")
+#     documents = DatabaseSubscription.mongo_collection.find({"label": "premium"})
+#     now_timestamp = pendulum.now().timestamp()
+#     for document in documents:
+#         if document["until_timestamp"] < now_timestamp:
+#             yield document
+#     else:
+#         yield from list()  # Return empty list
+
+
+# def deactivate_expired_premium_subscriptions():
+#     for subscription in search_expired_premium_subscriptions():
+#         database_user = DatabaseUser(subscription["telegram_account_id"])
+#         database_user.reload()
+#         database_user.set_premium_false()

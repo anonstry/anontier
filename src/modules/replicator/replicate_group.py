@@ -19,9 +19,9 @@ from src.database import (
     search_linked_message,
     search_room_members,
     unlink_document_user_room_token,
+    get_document_user_protection_status,
+    modify_document_room_participants_count,
 )
-
-# from src.modules.connection import add_message_header
 from src.modules.protector.mitigate_flood import SpamChecker
 from src.telegram.filters.room import linked_room__filter
 from src.telegram.modded.copy_media_group import copy_media_group
@@ -53,7 +53,6 @@ _albums: defaultdict[int, dict[str, Album]] = defaultdict(dict)
     filters.private
     & linked_room__filter
     & ~filters.regex("^/")
-    # & ~filters.command
     & filters.media_group
 )
 async def on_media_group(client: Client, message: Message):
@@ -85,12 +84,7 @@ async def on_media_group(client: Client, message: Message):
 
 
 async def on_album(client: Client, album: Album):
-    if client.me is None:
-        print("on_album: client.me is None")
-        return
-
     first_album_message = album.messages[0]
-    # last_album_message = album.messages[-1]
     family_ids = list()
     room_token = await get_document_user_linked_room_token(
         first_album_message.from_user.id
@@ -105,7 +99,7 @@ async def on_album(client: Client, album: Album):
             where_telegram_chat_id=message.chat.id,
             where_room_token=room_token,
             telegram_message_id=message.id,
-            label="connection-source-message",
+            label="replicator-source-message",
             family_id=family_id,
             media_group_id=message.media_group_id,
         )
@@ -117,12 +111,6 @@ async def on_album(client: Client, album: Album):
         )
     )
     for room_member in room_members:
-        # if check_user_block(
-        #     where_room_token=room_token,
-        #     telegram_account_id=first_album_message.from_user.id,
-        #     applied_by_telegram_account_id=room_member.telegram_account_id,
-        # ):
-        #     return
         reply_to_message_id = None
         if first_album_message.reply_to_message_id:
             try:
@@ -156,7 +144,6 @@ async def on_album(client: Client, album: Album):
             where_room_token=room_token,
             family_ids=family_ids,
         )
-        # last_album_message.stop_propagation()
 
 
 async def send_grouped_messages(
@@ -166,16 +153,8 @@ async def send_grouped_messages(
     where_telegram_chat_id: int,
     family_ids: list[int],
     reply_to_message_id: Optional[int] = None,
+    protect_content: bool = False,
 ):
-    if client.me is None:
-        print("send_grouped_messages: client.me is None")
-        return
-
-    # Aqui precisamos melhorar
-    # Provavelmente será necessário uma
-    # forma de registrar todos os albums
-    # e tambem todos as mensagens single como um album,
-    # para quando for editar uma mensagem: sempre edite a primeira.
     first_album_message = messages[0]
 
     spam_checker = SpamChecker()
@@ -184,6 +163,7 @@ async def send_grouped_messages(
             first_album_message.from_user.id,
             text="Your message wasn't sent, it was flagged as spam",
             reply_to_message_id=first_album_message.id,
+            protect_content=protect_content,
         )
         return
     try:
@@ -193,13 +173,8 @@ async def send_grouped_messages(
             first_album_message.chat.id,
             first_album_message.id,
             reply_to_message_id=reply_to_message_id,
-            # protect_content=True,
-            captions=[
-                #     # add_message_header(message, from_database_user) for message in messages
-                message.caption
-                for message in messages
-            ],
-            # ][0],  # Apenas a legenda da primeira mensagem é preservada,
+            protect_content=protect_content,
+            captions=[message.caption for message in messages],
         )
         for shadow_message, family_id in zip(shadow_messages, family_ids):
             await create_document_message(
@@ -207,23 +182,25 @@ async def send_grouped_messages(
                 where_telegram_chat_id=where_telegram_chat_id,
                 where_room_token=where_room_token,
                 telegram_message_id=shadow_message.id,
-                label="connection-shadow-message",
+                label="replicator-shadow-message",
                 family_id=family_id,
                 media_group_id=shadow_message.media_group_id,
             )
-            logger.debug(shadow_message.media_group_id)
+        protect_content = await get_document_user_protection_status(first_album_message.from_user.id)
         for shadow_message, source_message in zip(shadow_messages, messages):
             if not source_message.caption:
                 continue
-            if (
+            elif (
                 shadow_message.caption == source_message.caption
                 and shadow_message.caption_entities == source_message.caption_entities
             ):
                 continue
-            await shadow_message.edit_caption(
-                caption=source_message.caption,
-                caption_entities=source_message.caption_entities,
-            )
+            else:
+                await shadow_message.edit_caption(
+                    caption=source_message.caption,
+                    caption_entities=source_message.caption_entities,
+                )
     except (UserIsBlocked, InputUserDeactivated):
+        await modify_document_room_participants_count(where_room_token, -1)
         await unlink_document_user_room_token(where_telegram_chat_id)
         await deactivate_document_user(where_telegram_chat_id)

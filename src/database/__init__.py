@@ -48,11 +48,11 @@ class DocumentMessage(Document):
 class DocumentUser(Document):
     telegram_account_id: int
     room_token: Optional[str] = None
-    hidden: bool = False
-    premium: bool = False
-    username: Optional[str] = None
-    username_symbol: Optional[str] = None
+    # hidden: bool = False
+    # premium: bool = False
+    # username: Optional[str] = None
     deactivated: bool = False
+    allow_protection: bool = False
 
     # signature = create_token(16)
 
@@ -61,13 +61,34 @@ class DocumentUser(Document):
 
 
 class DocumentNotification:
+    where_room_token: Optional[str]
+    where_telegram_chat_id: int
+    until_timestamp: int
+    label: str
+
     class Settings:
         name = "notifications"
 
-class DocumentRestriction:
-    class Settings:
-        name = "restriction"
 
+class DocumentRestriction:
+    where_room_token: Optional[str]
+    where_telegram_chat_id: int
+    applied_by_telegram_account_id: int  # can be the bot
+    until_timestamp: int
+    label: str  # mute or block
+
+    class Settings:
+        name = "restrictions"
+
+
+class DocumentMembership:
+    where_room_token: str
+    where_telegram_chat_id: int
+    roles: Optional[list[str]] = list()  # e.g.: owner or moderator
+    permissions: Optional[list[str]] = list()  # e.g.: can_mute or can_delete_room
+
+    class Settings:
+        name = "memberships"
 
 
 # class Settings
@@ -185,11 +206,13 @@ async def get_document_room(token):
     return await DocumentRoom.find_one({DocumentRoom.token: token})
 
 
-async def create_document_room(size_limit=10):
+async def create_document_room(size_limit=10, hidden=False):
     room_token = create_random_string(32)
     document_room = await get_document_room(room_token)
     if not document_room:
-        document_room = DocumentRoom(token=room_token, size_limit=size_limit)
+        document_room = DocumentRoom(
+            token=room_token, size_limit=size_limit, hidden=hidden,
+        )
         await document_room.insert()
     return document_room
 
@@ -205,7 +228,6 @@ async def get_document_message_from_generic_specifications(
     telegram_message_id,
     where_room_token=None,
 ):
-    
     if not where_room_token:
         document_message = await DocumentMessage.find_one(
             {
@@ -314,8 +336,18 @@ async def search_linked_message(
 
 
 async def search_all_linked_messages(family_id):
-    documents = await DocumentMessage.find(DocumentMessage.family_id == family_id).to_list()
+    documents = await DocumentMessage.find(
+        DocumentMessage.family_id == family_id
+    ).to_list()
     try:
         return documents
     except IndexError:
         return None
+
+
+async def get_document_user_protection_status(telegram_account_id):
+    document_user = await DocumentUser.find_one(
+        {DocumentUser.telegram_account_id: telegram_account_id}
+    )
+    if document_user:
+        return document_user.allow_protection

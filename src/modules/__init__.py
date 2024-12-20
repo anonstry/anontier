@@ -1,39 +1,30 @@
-from pathlib import Path
+from re import compile
 
 from hydrogram import filters
 from hydrogram.client import Client
 from hydrogram.raw.types import UpdateBotStopped
-from hydrogram.types import Message, Update
-
-from re import compile
+from hydrogram.types import (
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+    Message,
+    Update,
+)
 
 from src.database import (
-    deactivate_document_user,
-    unlink_document_user_room_token,
     create_document_user,
-)
-from src.telegram.filters.room import linked_room__filter
-from src.database import (
-    update_document_user_room_token,
+    deactivate_document_user,
     get_document_user_linked_room_token,
+    get_document_user_protection_status,
+    unlink_document_user_room_token,
+    update_document_user_room_token,
 )
+
+# from src.telegram.filters.room import linked_room__filter
 
 
 @Client.on_message(filters.private, group=-1)
 async def register(client, message: Message):
     await create_document_user(message.from_user.id)
-
-
-# def advice to use a command
-# def dynamic rotative username
-
-
-@Client.on_message(filters.private & filters.command("link"))
-async def create_room_link(client: Client, message: Message):
-    room_token = await get_document_user_linked_room_token(message.from_user.id)
-    await message.reply(
-        f"https://t.me/{client.me.username}?start=join-room-token={room_token}"
-    )
 
 
 @Client.on_message(filters.private & filters.command("start"))
@@ -46,20 +37,51 @@ async def join_using_room_link(client: Client, message: Message):
 
     room_token = pattern.split(message.command[1])[1]
 
+    if room_token == "None":
+        await message.reply("Send /config or /c again and match a room")
+        await message.stop_propagation()
+        return
+
     await update_document_user_room_token(message.from_user.id, room_token)
 
     await message.reply(f"You entered in a room (token: {room_token})")
 
-    message.stop_propagation()
+
+async def show_main_menu(client, where_telegram_chat_id):
+    # Depois pode ser possível um "mount_main_menu" e um "mount_main_menu_without_about_room"
+    keyboard = InlineKeyboardMarkup(
+        [
+            [InlineKeyboardButton("• ROOM •", "about-rooms")],
+            [
+                InlineKeyboardButton("match a room", "match-room"),
+                InlineKeyboardButton("unmatch a room", "unmatch-room"),
+            ],
+            [
+                InlineKeyboardButton("create a public room", "create-public-room"),
+                InlineKeyboardButton("create a private room", "create-private-room"),
+            ],
+        ]
+    )
+
+    room_token = await get_document_user_linked_room_token(where_telegram_chat_id)
+    room_invite_link = f"t.me/{client.me.username}?start=join-room-token={room_token}"
+
+    await client.send_message(
+        where_telegram_chat_id,
+        f"Hi [#u{where_telegram_chat_id}]\n"
+        f"Your linked room invite link: {room_invite_link}\n\n"
+        f"  **• Allow forwarding:** {await get_document_user_protection_status(where_telegram_chat_id)}`\n",
+        reply_markup=keyboard,
+        disable_web_page_preview=True,
+    )
 
 
-@Client.on_message(filters.private & filters.command("start") & ~linked_room__filter)
+@Client.on_message(
+    filters.private
+    & (filters.command("start") | filters.command("config") | filters.command("c"))
+)
 async def initialize(client, message: Message):
-    caption_text = Path("assets/texts/initialization.txt").read_text()
-    photo_filepath = Path("assets/images/initialization.jpg")
-    if photo_filepath.exists():
-        await message.reply_photo(str(photo_filepath), caption=caption_text, quote=True)
-    message.stop_propagation()
+    await show_main_menu(client, where_telegram_chat_id=message.from_user.id)
 
 
 @Client.on_raw_update()

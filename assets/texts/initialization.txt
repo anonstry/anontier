@@ -1,3 +1,0 @@
-**Hello!**
-Try /manual for instructions,
-or a simple /match to join in a random room.

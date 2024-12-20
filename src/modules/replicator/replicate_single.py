@@ -15,6 +15,8 @@ from src.database import (
     search_linked_message,
     search_room_members,
     unlink_document_user_room_token,
+    get_document_user_protection_status,
+    modify_document_room_participants_count
 )
 
 # from src.database.restriction import check_user_block
@@ -29,19 +31,15 @@ async def send_single_message(
     where_room_token,
     where_telegram_chat_id: int,
     family_id: int,
+    protect_content: bool = False,
     reply_to_message_id: Optional[int] = None,
 ):
-    if client.me is None:
-        print("send_single_message: client.me is None")
-        return
-
     try:
         if not message.text:
             shadow_message = await message.copy(
                 where_telegram_chat_id,
                 caption=message.caption,
                 caption_entities=message.caption_entities,
-                # caption=add_message_header(message_father, from_database_user),
                 reply_to_message_id=reply_to_message_id,
             )
         else:
@@ -49,8 +47,7 @@ async def send_single_message(
                 where_telegram_chat_id,
                 text=message.text,
                 entities=message.entities,
-                # add_message_header(message_father, from_database_user),
-                # protect_content=True,
+                protect_content=protect_content,
                 reply_to_message_id=reply_to_message_id,
             )
         if shadow_message is not None and isinstance(shadow_message, Message):
@@ -59,11 +56,12 @@ async def send_single_message(
                 where_telegram_chat_id=where_telegram_chat_id,
                 where_room_token=where_room_token,
                 telegram_message_id=shadow_message.id,
-                label="connection-shadow-message",
+                label="replicator-shadow-message",
                 family_id=family_id,
             )
 
     except (UserIsBlocked, InputUserDeactivated):
+        await modify_document_room_participants_count(where_room_token, -1)
         await unlink_document_user_room_token(where_telegram_chat_id)
         await deactivate_document_user(where_telegram_chat_id)
 
@@ -72,10 +70,6 @@ async def send_single_message(
     filters.private & linked_room__filter & ~filters.regex("^/") & ~filters.media_group
 )
 async def single_message_receptor(client: Client, message: Message):
-    if client.me is None:
-        print("single_message_receptor: client.me is None")
-        return
-
     spam_checker = SpamChecker()
     if spam_checker.add_message(message.from_user.id):
         await client.send_message(
@@ -94,7 +88,7 @@ async def single_message_receptor(client: Client, message: Message):
         where_telegram_chat_id=message.chat.id,
         where_room_token=room_token,
         telegram_message_id=message.id,
-        label="connection-source-message",
+        label="replicator-source-message",
         family_id=family_id,
     )
     room_members = list(
@@ -104,13 +98,8 @@ async def single_message_receptor(client: Client, message: Message):
             await search_room_members(room_token),
         )
     )
+    protect_content = await get_document_user_protection_status(message.from_user.id)
     for room_member in room_members:
-        #     if check_user_block(
-        #         where_room_token=database_user.room_token,
-        #         telegram_account_id=message.from_user.id,
-        #         applied_by_telegram_account_id=room_member.telegram_account_id,
-        #     ):
-        #         return
         reply_to_message_id = None
         if message.reply_to_message_id:
             try:
@@ -143,6 +132,7 @@ async def single_message_receptor(client: Client, message: Message):
             reply_to_message_id=reply_to_message_id,
             where_room_token=room_token,
             family_id=family_id,
+            protect_content=protect_content,
         )
 
     message.stop_propagation()
